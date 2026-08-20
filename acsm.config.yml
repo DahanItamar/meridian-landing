@@ -1,0 +1,10 @@
+# acsm.config.yml — safe to commit
+# Confirmed with the user on 2026-08-21. Skips the ACSM inference-and-confirmation
+# exchange in later sessions. Five enum values, no identifiers, no secrets.
+appType: Web
+targetMarkets: [Israel, EU]
+dataSensitivity: StandardPII
+aiIntegration: None
+infrastructure: HybridCloud
+configVersion: 1
+lastConfirmed: 2026-08-21
