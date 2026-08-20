@@ -29,6 +29,9 @@ export interface Testimonial {
 export interface Content {
   meta: { title: string; description: string };
 
+  /** The wordmark and the product it names. AC-009 requires both in the hero. */
+  brand: { name: string; product: string };
+
   hero: {
     eyebrow: string;
     headline: string;

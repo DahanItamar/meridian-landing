@@ -13,6 +13,8 @@ export const en = {
       "A 38mm conical burr grinder built for one thing: espresso that does not channel. Join the launch list.",
   },
 
+  brand: { name: "Meridian", product: "Meridian M1" },
+
   hero: {
     eyebrow: "Single-dose hand grinder",
     headline: "Espresso does not start at the machine.",

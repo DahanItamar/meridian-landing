@@ -10,7 +10,7 @@
 - [x] T-03 Build the `[locale]` shell setting `lang` and `dir` from a typed locale, with `generateStaticParams` returning `en` — closes AC-005 — files: app/[locale]/layout.tsx, app/[locale]/page.tsx, lib/locale.ts — depends: T-02
 - [x] T-04 Redirect `/` to `/en` — closes AC-002 — files: next.config.ts — depends: T-03
 - [x] T-05 Establish the Tailwind theme tokens and the logical-property baseline, so no physical directional utility appears in any component — closes AC-007 — files: tailwind.config.ts, app/globals.css — depends: T-01
-- [ ] T-06 Render the hero from the content module, with the product image marked `priority` — closes AC-009, AC-029 — files: components/HeroSection.tsx, app/[locale]/page.tsx — depends: T-03, T-05
+- [x] T-06 Render the hero from the content module, with the product image marked `priority` — closes AC-009, AC-029 — files: components/HeroSection.tsx, app/[locale]/page.tsx — depends: T-03, T-05
 - [ ] T-07 Render the mid-page content sections — social proof strip, three feature blocks, specification grid, testimonials — with every image through `next/image` at explicit dimensions and lazy-loaded — closes AC-028 — files: components/SocialProof.tsx, components/FeatureBlock.tsx, components/SpecGrid.tsx, components/Testimonials.tsx — depends: T-06
 - [ ] T-08 Build the FAQ accordion, each question focusable and toggled by Enter or Space — closes AC-012, AC-013 — files: components/Faq.tsx — depends: T-07
 - [ ] T-09 Build the email capture markup: a visible associated label, an unticked separable consent checkbox that gates submission, and the consent notice linking the privacy page — closes AC-026, AC-044, AC-050 — files: components/EmailCapture.tsx — depends: T-08

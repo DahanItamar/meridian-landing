@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { HeroSection } from "@/components/HeroSection";
 import { contentFor } from "@/lib/locale";
 
 export default async function LandingPage({
@@ -10,10 +11,10 @@ export default async function LandingPage({
   const content = contentFor(locale);
   if (!content) notFound();
 
-  // Sections land in T-06 through T-10, in the order AC-011 requires.
+  // Remaining sections land in T-07 through T-10, in the order AC-011 requires.
   return (
     <main>
-      <h1>{content.hero.headline}</h1>
+      <HeroSection content={content} />
     </main>
   );
 }

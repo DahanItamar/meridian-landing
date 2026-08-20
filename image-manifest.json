@@ -1,0 +1,22 @@
+{
+  "hero-grinder.jpg": {
+    "width": 1024,
+    "height": 683,
+    "bytes": 81774
+  },
+  "feature-adjust.jpg": {
+    "width": 1024,
+    "height": 683,
+    "bytes": 80057
+  },
+  "feature-burrs.jpg": {
+    "width": 860,
+    "height": 768,
+    "bytes": 73342
+  },
+  "feature-teardown.jpg": {
+    "width": 1024,
+    "height": 768,
+    "bytes": 40533
+  }
+}
