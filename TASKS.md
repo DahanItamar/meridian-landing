@@ -7,7 +7,7 @@
 
 - [x] T-01 Scaffold Next.js 15 with TypeScript strict and Tailwind, and wire `verify` to `next lint && next build` — closes AC-036 — files: package.json, tsconfig.json, next.config.ts, tailwind.config.ts, .eslintrc.json
 - [x] T-02 Define the `Content` interface and the English content module, with every string and product value the page needs — closes AC-003 — files: content/types.ts, content/en.ts — depends: T-01
-- [ ] T-03 Build the `[locale]` shell setting `lang` and `dir` from a typed locale, with `generateStaticParams` returning `en` — closes AC-001, AC-005 — files: app/[locale]/layout.tsx, app/[locale]/page.tsx, lib/locale.ts — depends: T-02
+- [x] T-03 Build the `[locale]` shell setting `lang` and `dir` from a typed locale, with `generateStaticParams` returning `en` — closes AC-005 — files: app/[locale]/layout.tsx, app/[locale]/page.tsx, lib/locale.ts — depends: T-02
 - [ ] T-04 Redirect `/` to `/en` — closes AC-002 — files: next.config.ts — depends: T-03
 - [ ] T-05 Establish the Tailwind theme tokens and the logical-property baseline, so no physical directional utility appears in any component — closes AC-007 — files: tailwind.config.ts, app/globals.css — depends: T-01
 - [ ] T-06 Render the hero from the content module, with the product image marked `priority` — closes AC-009, AC-029 — files: components/HeroSection.tsx, app/[locale]/page.tsx — depends: T-03, T-05
@@ -23,23 +23,23 @@
 
 ## Coverage
 
-20 criteria in this slice, 13 tasks, no orphans in either direction.
+19 criteria in this slice, 13 tasks, no orphans in either direction.
 
-|  | 001 | 002 | 003 | 005 | 007 | 009 | 011 | 012 | 013 | 026 | 028 | 029 | 035 | 036 | 038 | 039 | 040 | 042 | 044 | 050 |
-| --- |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-| T-01 | | | | | | | | | | | | | | ● | | | | | | |
-| T-02 | | | ● | | | | | | | | | | | | | | | | | |
-| T-03 | ● | | | ● | | | | | | | | | | | | | | | | |
-| T-04 | | ● | | | | | | | | | | | | | | | | | | |
-| T-05 | | | | | ● | | | | | | | | | | | | | | | |
-| T-06 | | | | | | ● | | | | | | ● | | | | | | | | |
-| T-07 | | | | | | | | | | | ● | | | | | | | | | |
-| T-08 | | | | | | | | ● | ● | | | | | | | | | | | |
-| T-09 | | | | | | | | | | ● | | | | | | | | | ● | ● |
-| T-10 | | | | | | | ● | | | | | | ● | | | | | | | |
-| T-11 | | | | | | | | | | | | | | | | | ● | | | |
-| T-12 | | | | | | | | | | | | | | | ● | ● | | | | |
-| T-13 | | | | | | | | | | | | | | | | | | ● | | |
+|  | 002 | 003 | 005 | 007 | 009 | 011 | 012 | 013 | 026 | 028 | 029 | 035 | 036 | 038 | 039 | 040 | 042 | 044 | 050 |
+| --- |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| T-01 |  |  |  |  |  |  |  |  |  |  |  |  | ● |  |  |  |  |  |  |
+| T-02 |  | ● |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| T-03 |  |  | ● |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| T-04 | ● |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| T-05 |  |  |  | ● |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| T-06 |  |  |  |  | ● |  |  |  |  |  | ● |  |  |  |  |  |  |  |  |
+| T-07 |  |  |  |  |  |  |  |  |  | ● |  |  |  |  |  |  |  |  |  |
+| T-08 |  |  |  |  |  |  | ● | ● |  |  |  |  |  |  |  |  |  |  |  |
+| T-09 |  |  |  |  |  |  |  |  | ● |  |  |  |  |  |  |  |  | ● | ● |
+| T-10 |  |  |  |  |  | ● |  |  |  |  |  | ● |  |  |  |  |  |  |  |
+| T-11 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | ● |  |  |  |
+| T-12 |  |  |  |  |  |  |  |  |  |  |  |  |  | ● | ● |  |  |  |  |
+| T-13 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | ● |  |  |
 
 ## Criteria not in this slice
 
@@ -47,7 +47,7 @@ Not gaps — scheduled work, named by milestone.
 
 | Criterion | Milestone | Why not M1 |
 | --- | --- | --- |
-| AC-008 | **M3** | Names four prerendered routes; `/he` and both privacy pages do not exist until M2 and M3. The spec's §10 cites it under M1 — that is an over-claim, and citing it here would make T-03 unverifiable. |
+| AC-001, AC-008 | **M3** | Both name routes that do not exist yet — AC-001 names `/he`, AC-008 names four routes including both privacy pages. The spec §10 cites both under M1; that is an over-claim, and citing them here would make T-03 unverifiable. |
 | AC-016 – AC-025, AC-027, AC-041 | M2 | Subscribe route, error states, privacy page |
 | AC-045, AC-046, AC-048, AC-051, AC-057, AC-060 | M2 | Double opt-in, consent record, Art. 13 disclosure, live-region announcement, log scrubbing |
 | AC-004, AC-006 | M3 | Hebrew locale and the language toggle |
