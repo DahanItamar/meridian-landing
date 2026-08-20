@@ -44,8 +44,8 @@ export function HeroSection({ content }: { content: Content }) {
           <Image
             src={hero.image}
             alt={hero.imageAlt}
-            width={1024}
-            height={683}
+            width={hero.width}
+            height={hero.height}
             priority
             sizes="(min-width: 1024px) 50vw, 100vw"
             className="h-full w-full object-cover"

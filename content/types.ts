@@ -16,6 +16,10 @@ export interface Feature {
   /** Path under /public. The same asset serves both locales. */
   image: string;
   imageAlt: string;
+  /** Intrinsic pixel size of the file. Must match it — AC-028 exists to reserve
+   *  correct layout space, and a wrong number reserves the wrong space. */
+  width: number;
+  height: number;
 }
 
 export interface Testimonial {
@@ -39,6 +43,8 @@ export interface Content {
     cta: string;
     image: string;
     imageAlt: string;
+    width: number;
+    height: number;
   };
 
   /** Exactly 3. Invented figures, disclosed in the footer (AC-035). */
