@@ -5,7 +5,7 @@
 > Demo at the end: a link you can send someone. Full page, real content, real images, running on
 > your VPS behind nginx.
 
-- [ ] T-01 Scaffold Next.js 15 with TypeScript strict and Tailwind, and wire `verify` to `next lint && next build` — closes AC-036 — files: package.json, tsconfig.json, next.config.ts, tailwind.config.ts, .eslintrc.json
+- [x] T-01 Scaffold Next.js 15 with TypeScript strict and Tailwind, and wire `verify` to `next lint && next build` — closes AC-036 — files: package.json, tsconfig.json, next.config.ts, tailwind.config.ts, .eslintrc.json
 - [ ] T-02 Define the `Content` interface and the English content module, with every string and product value the page needs — closes AC-003 — files: content/types.ts, content/en.ts — depends: T-01
 - [ ] T-03 Build the `[locale]` shell setting `lang` and `dir` from a typed locale, with `generateStaticParams` returning `en` — closes AC-001, AC-005 — files: app/[locale]/layout.tsx, app/[locale]/page.tsx, lib/locale.ts — depends: T-02
 - [ ] T-04 Redirect `/` to `/en` — closes AC-002 — files: next.config.ts — depends: T-03
