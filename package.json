@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "next lint",
     "format": "prettier --write .",
-    "verify": "next lint && next build"
+    "verify": "next lint && next build",
+    "check:logical": "node scripts/check-logical.mjs"
   },
   "dependencies": {
     "next": "15.5.23",

@@ -1,26 +1,93 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/**
+ * Meridian theme tokens.
+ *
+ * Semantic names only — components reference `bg-surface`, never `bg-stone-50`.
+ * That is what keeps the five portfolio projects visually distinct: they diverge
+ * by this file rather than by literal colours scattered through JSX
+ * (constitution, Naming).
+ *
+ * Every pair below was measured, not eyeballed:
+ *   ink     on surface  17.71:1
+ *   muted   on surface   6.79:1
+ *   brand   on surface   5.75:1
+ *   white   on brand     6.14:1
+ *   edge    on surface   3.64:1   (form borders, focus rings — WCAG 1.4.11 needs 3:1)
+ *   line    on surface   1.25:1   (decorative hairlines only, deliberately below 3:1)
+ */
+@theme {
+  --color-surface: #faf7f3;
+  --color-surface-raised: #ffffff;
+  --color-surface-deep: #14100e;
+
+  --color-ink: #14100e;
+  --color-ink-inverse: #faf7f3;
+  --color-muted: #5f554e;
+  --color-muted-inverse: #b8ada3;
+
+  --color-brand: #9c4a24;
+  --color-brand-hover: #833c1c;
+
+  --color-line: #e5ded5;
+  --color-edge: #8c7f73;
+
+  --font-display: var(--font-display), Georgia, "Times New Roman", serif;
+  --font-body: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+
+  --radius-card: 0.25rem;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/**
+ * Direction-agnostic by construction.
+ *
+ * AC-007 requires every directional value to be logical. `text-align: start`
+ * here means no component needs `text-left`, which is the single most common
+ * way an RTL layout breaks without anyone noticing in English.
+ */
+html {
+  text-align: start;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-surface);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  text-wrap: pretty;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  text-wrap: balance;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+/**
+ * A visible focus indicator on every interactive element (AC-030). Defined once,
+ * here, so no component can remove it with `outline: none` and leave keyboard
+ * users stranded — the most common accessibility failure in modern codebases.
+ */
+:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/**
+ * AC-015: honour reduced motion globally rather than per-component, so a
+ * component added later inherits the guarantee instead of having to remember it.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

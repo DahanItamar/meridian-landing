@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Fraunces, Inter } from "next/font/google";
 import { notFound } from "next/navigation";
 import { AVAILABLE_LOCALES, contentFor, dirFor, isLocale } from "@/lib/locale";
 import "../globals.css";
@@ -8,6 +9,24 @@ import "../globals.css";
  * route sits under a dynamic segment, that segment owns <html>, which is what
  * lets `lang` and `dir` be per-locale rather than hardcoded (AC-004, AC-005).
  */
+
+/**
+ * next/font downloads at build time and self-hosts the result, so the container
+ * build needs network access but the running container does not. `display: swap`
+ * means text is readable before the font arrives rather than invisible.
+ */
+const display = Fraunces({
+  subsets: ["latin"],
+  weight: ["600", "700"],
+  variable: "--font-display",
+  display: "swap",
+});
+
+const body = Inter({
+  subsets: ["latin"],
+  variable: "--font-body",
+  display: "swap",
+});
 
 export function generateStaticParams() {
   return AVAILABLE_LOCALES.map((locale) => ({ locale }));
@@ -38,7 +57,7 @@ export default async function LocaleLayout({
   if (!isLocale(locale)) notFound();
 
   return (
-    <html lang={locale} dir={dirFor(locale)}>
+    <html lang={locale} dir={dirFor(locale)} className={`${display.variable} ${body.variable}`}>
       <body>{children}</body>
     </html>
   );

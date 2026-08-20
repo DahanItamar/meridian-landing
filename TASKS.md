@@ -9,7 +9,7 @@
 - [x] T-02 Define the `Content` interface and the English content module, with every string and product value the page needs — closes AC-003 — files: content/types.ts, content/en.ts — depends: T-01
 - [x] T-03 Build the `[locale]` shell setting `lang` and `dir` from a typed locale, with `generateStaticParams` returning `en` — closes AC-005 — files: app/[locale]/layout.tsx, app/[locale]/page.tsx, lib/locale.ts — depends: T-02
 - [x] T-04 Redirect `/` to `/en` — closes AC-002 — files: next.config.ts — depends: T-03
-- [ ] T-05 Establish the Tailwind theme tokens and the logical-property baseline, so no physical directional utility appears in any component — closes AC-007 — files: tailwind.config.ts, app/globals.css — depends: T-01
+- [x] T-05 Establish the Tailwind theme tokens and the logical-property baseline, so no physical directional utility appears in any component — closes AC-007 — files: tailwind.config.ts, app/globals.css — depends: T-01
 - [ ] T-06 Render the hero from the content module, with the product image marked `priority` — closes AC-009, AC-029 — files: components/HeroSection.tsx, app/[locale]/page.tsx — depends: T-03, T-05
 - [ ] T-07 Render the mid-page content sections — social proof strip, three feature blocks, specification grid, testimonials — with every image through `next/image` at explicit dimensions and lazy-loaded — closes AC-028 — files: components/SocialProof.tsx, components/FeatureBlock.tsx, components/SpecGrid.tsx, components/Testimonials.tsx — depends: T-06
 - [ ] T-08 Build the FAQ accordion, each question focusable and toggled by Enter or Space — closes AC-012, AC-013 — files: components/Faq.tsx — depends: T-07
