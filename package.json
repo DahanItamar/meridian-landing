@@ -2,11 +2,11 @@
   "name": "meridian-landing",
   "version": "0.1.0",
   "private": true,
-  "description": "Bilingual (EN/HE) RTL landing page for a fictional premium espresso grinder.",
+  "description": "Hebrew-only pre-launch landing page for Meridian, a fictional specialty coffee brand. WebGL pinned scroll sequence, RTL throughout.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "node .next/standalone/server.js",
     "lint": "next lint",
     "format": "prettier --write .",
     "verify": "next lint && next build",
@@ -34,6 +34,7 @@
     "meshoptimizer": "^1.2.0",
     "prettier": "^3",
     "prettier-plugin-tailwindcss": "^0.6",
+    "sharp": "^0.35.3",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
