@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 206 206" width="206" height="206">
+  <!--
+    The tab icon. App Router picks this up from app/icon.svg and emits the
+    <link> itself, so nothing has to be registered by hand.
+
+    It carries its own dark ground rather than sitting transparent: browser tab
+    strips are light in one theme and dark in the other, and a gold hairline on
+    transparent disappears against the light one. The ground is the page's own
+    surface colour, so the tab reads as the site.
+
+    Drawn at the roundel's own 206 viewBox and scaled down by the browser — the
+    mark is the same one components/brand/Roundel.tsx renders in the nav.
+  -->
+  <rect width="206" height="206" rx="44" fill="#0d0c0b" />
+  <g transform="translate(103 103) scale(0.82) translate(-103 -103)">
+    <circle cx="103" cy="103" r="99" stroke="#c9a25f" stroke-width="9" fill="none" />
+    <text
+      x="103"
+      y="121"
+      text-anchor="middle"
+      font-family="Georgia, 'Times New Roman', serif"
+      font-size="92"
+      font-weight="500"
+      fill="#d8ab68"
+    >M</text>
+    <path d="M103 140v34" stroke="#c9a25f" stroke-width="7" stroke-linecap="round" />
+    <path d="M100 145c-14 4-24 15-26 29 14-2 24-13 26-29z" fill="#c9a25f" />
+    <path d="M106 145c14 4 24 15 26 29-14-2-24-13-26-29z" fill="#c9a25f" />
+  </g>
+</svg>

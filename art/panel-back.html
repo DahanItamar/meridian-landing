@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Meridian — back panel, flat</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+  rel="stylesheet"
+/>
+<style>
+  /**
+   * The BACK printed face, flat, 684x1360.
+   *
+   * 684 rather than 680 because the back face measures 0.5027 w/h against the
+   * front's 0.5000 — three/project.js fits each panel by height, so an aspect
+   * that does not match its own face stretches the type sideways.
+   *
+   * The back carries no relief worth registering to (the model sculpts only the
+   * front), so this is laid out for reading rather than to a survey. It is the
+   * panel beat 3 pushes in on, so the origin line and the roast row are set at
+   * a size that survives a camera 3.6 units out at 23mm.
+   *
+   * Same edge rule as the front: the outermost pixels stay foil, because they
+   * are what the clamped texture wraps onto the gussets.
+   */
+  html, body { margin: 0; padding: 0; background: #0d0c0b; }
+
+  .panel {
+    position: relative;
+    width: 684px;
+    height: 1360px;
+    background: #0d0c0b;
+    overflow: hidden;
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    color: #f1ebe0;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .foil {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, #100e0c 0%, #0d0c0b 42%, #0b0a09 100%);
+  }
+
+  .crimp {
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    height: 168px;
+    background: #17130f;
+  }
+  .crimp::before {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    top: 26px;
+    height: 26px;
+    background: repeating-linear-gradient(90deg, #241d17 0 7px, #17130f 7px 14px);
+    opacity: 0.9;
+  }
+  .crimp::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    height: 3px;
+    background: #241d17;
+  }
+
+  .body {
+    position: absolute;
+    inset-inline: 0;
+    top: 168px;
+    bottom: 96px;
+    padding: 0 105px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .mark { margin-top: 78px; }
+
+  .wordmark {
+    margin-top: 26px;
+    font-family: "Playfair Display", "Bodoni MT", Didot, Georgia, serif;
+    font-size: 34px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-indent: 0.05em;
+    color: #f1ebe0;
+  }
+  .sub {
+    margin-top: 9px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.4em;
+    text-indent: 0.4em;
+    color: #c9a25f;
+  }
+
+  .rule {
+    width: 100%;
+    height: 1px;
+    margin: 30px 0;
+    background: #2c241d;
+  }
+
+  .story {
+    text-align: center;
+    text-wrap: balance;
+    font-size: 14.5px;
+    font-weight: 400;
+    line-height: 1.95;
+    color: #a9a093;
+  }
+
+  /* ── Tasting notes ───────────────────────────────────────────────────── */
+  .notes {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 34px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-indent: 0.22em;
+    color: #e0d5c2;
+  }
+  .notes i {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #c9a25f;
+    flex: none;
+  }
+
+  /* ── Spec rows ───────────────────────────────────────────────────────── */
+  .specs {
+    width: 100%;
+    margin-top: 38px;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+  }
+  .specs .row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 11px 0;
+    border-bottom: 1px solid #221c17;
+    font-size: 12px;
+  }
+  .specs .k {
+    letter-spacing: 0.16em;
+    color: #6f6659;
+    flex: none;
+  }
+  .specs .v {
+    text-align: end;
+    color: #ded4c4;
+  }
+
+  /* ── Roast date + barcode ────────────────────────────────────────────── */
+  .roasted {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 34px;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: #6f6659;
+  }
+  .roasted span.box {
+    display: inline-block;
+    width: 96px;
+    height: 24px;
+    border: 1px dashed #4a4038;
+  }
+
+  .barcode {
+    margin-top: 26px;
+    width: 232px;
+    padding: 12px 14px 8px;
+    background: #f1ebe0;
+  }
+  .barcode svg { display: block; }
+  .barcode .digits {
+    margin-top: 6px;
+    text-align: center;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.24em;
+    text-indent: 0.24em;
+    color: #14100e;
+  }
+
+  .fineprint {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 116px;
+    text-align: center;
+    font-size: 10.5px;
+    letter-spacing: 0.12em;
+    line-height: 1.9;
+    color: #5f564b;
+  }
+</style>
+</head>
+<body>
+<div class="panel">
+  <div class="foil"></div>
+  <div class="crimp"></div>
+
+  <div class="body">
+    <svg class="mark" width="112" height="112" viewBox="0 0 206 206" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="103" cy="103" r="99" stroke="#c9a25f" stroke-width="4" />
+      <text
+        x="103" y="121" text-anchor="middle"
+        font-family="'Playfair Display', 'Bodoni MT', Didot, Georgia, serif"
+        font-size="92" font-weight="500" fill="#d8ab68"
+      >M</text>
+      <path d="M103 140v34" stroke="#c9a25f" stroke-width="2.6" stroke-linecap="round" />
+      <path d="M100 145c-14 4-24 15-26 29 14-2 24-13 26-29z" fill="#c9a25f" opacity="0.94" />
+      <path d="M106 145c14 4 24 15 26 29-14-2-24-13-26-29z" fill="#c9a25f" opacity="0.94" />
+    </svg>
+
+    <div class="wordmark">MERIDIAN</div>
+    <div class="sub">SPECIALTY COFFEE</div>
+
+    <div class="rule"></div>
+
+    <p class="story">
+      Selected in small lots from boutique farms, roasted to order and sealed
+      within the hour. Every bag carries the date it was roasted, because that
+      is the only number on it that changes the cup.
+    </p>
+
+    <div class="notes">
+      <span>DARK CHOCOLATE</span><i></i><span>PECAN</span><i></i><span>CITRUS</span>
+    </div>
+
+    <div class="specs">
+      <div class="row"><span class="k">ORIGIN</span><span class="v">Colombia &amp; Ethiopia</span></div>
+      <div class="row"><span class="k">PROCESS</span><span class="v">Washed &amp; Anaerobic</span></div>
+      <div class="row"><span class="k">ROAST</span><span class="v">Medium-Dark</span></div>
+      <div class="row"><span class="k">NET WEIGHT</span><span class="v">1 kg · whole bean</span></div>
+    </div>
+
+    <div class="roasted">ROASTED ON <span class="box"></span></div>
+
+    <div class="barcode">
+      <svg id="bars" width="204" height="62" viewBox="0 0 204 62" xmlns="http://www.w3.org/2000/svg"></svg>
+      <div class="digits">7 290011 458203</div>
+    </div>
+  </div>
+
+  <p class="fineprint">
+    Meridian Specialty Coffee · Roasted in Israel<br />
+    Store sealed, dry and away from light · meridian.coffee
+  </p>
+</div>
+
+<script>
+  /**
+   * Barcode bars. Seeded like the beans on the front, so this file renders to
+   * the same PNG every time. It is a plausible pattern rather than a valid
+   * EAN-13 — Meridian is an invented brand and the number below is not one a
+   * scanner should ever resolve to a real product.
+   */
+  function rng(seed) {
+    let s = seed >>> 0;
+    return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296);
+  }
+
+  const rand = rng(4580211);
+  const bars = [];
+  let x = 0;
+  while (x < 204) {
+    const w = 1 + Math.floor(rand() * 3);
+    if (rand() > 0.42) bars.push('<rect x="' + x + '" y="0" width="' + w + '" height="62" fill="#14100e"/>');
+    x += w + 1;
+  }
+  document.getElementById("bars").innerHTML = bars.join("");
+</script>
+</body>
+</html>

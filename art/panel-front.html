@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Meridian — front panel, flat</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap"
+  rel="stylesheet"
+/>
+<style>
+  /**
+   * The FRONT printed face, flat, 680x1360.
+   *
+   * Every number here is registered to relief measured off the model, not
+   * chosen by eye — the pouch has the roundel and the window sculpted into it,
+   * so print that lands anywhere else shows up as a ghost ridge beside the
+   * thing it was meant to be. See art/README.md for how they were measured.
+   *
+   *   crimp band      y    0 -  168
+   *   roundel emboss  cx 340, cy 472, diameter 205
+   *   label emboss    x   90 -  590, y 650 - 890
+   *   window emboss   x   90 -  590, y 995 - 1188
+   *   base fold       y 1290 - 1360
+   *
+   * The ground is the foil colour and the outermost pixels are never anything
+   * else: three/project.js clamps the texture at the panel edge, so those
+   * pixels are what wraps around the shoulder onto the gusset. A coloured edge
+   * would smear a stripe down the side of the pack.
+   */
+  @page { margin: 0; }
+  html, body { margin: 0; padding: 0; background: #0d0c0b; }
+
+  .panel {
+    position: relative;
+    width: 680px;
+    height: 1360px;
+    background: #0d0c0b;
+    overflow: hidden;
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    color: #f1ebe0;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Foil is not flat black. A very slight vertical lift keeps the print from
+     looking like it was pasted onto a void once the studio lights hit it. */
+  .foil {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, #100e0c 0%, #0d0c0b 42%, #0b0a09 100%);
+  }
+
+  /* ── Top crimp seal ──────────────────────────────────────────────────── */
+  .crimp {
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    height: 168px;
+    background: #17130f;
+  }
+  /* The serration of a heat-sealed crimp, drawn rather than photographed. */
+  .crimp::before {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    top: 26px;
+    height: 26px;
+    background: repeating-linear-gradient(90deg, #241d17 0 7px, #17130f 7px 14px);
+    opacity: 0.9;
+  }
+  .crimp::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    height: 3px;
+    background: #241d17;
+  }
+
+  /* ── Roundel ─────────────────────────────────────────────────────────── */
+  .roundel {
+    position: absolute;
+    left: 237px;
+    top: 369px;
+    width: 206px;
+    height: 206px;
+  }
+
+  /* ── Cream label band ────────────────────────────────────────────────── */
+  .label {
+    position: absolute;
+    left: 90px;
+    top: 652px;
+    width: 500px;
+    height: 212px;
+    background: #f1ebe0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #14100e;
+  }
+  .label .rule-gold {
+    width: 62px;
+    height: 2px;
+    background: #b8792f;
+    margin-bottom: 17px;
+  }
+  .label .origin {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.36em;
+    text-indent: 0.36em;
+    color: #a8702c;
+  }
+  .label .wordmark {
+    font-family: "Playfair Display", "Bodoni MT", Didot, Georgia, serif;
+    font-weight: 500;
+    font-size: 62px;
+    line-height: 1.08;
+    letter-spacing: 0.012em;
+    margin: 9px 0 4px;
+  }
+  .label .specialty {
+    font-size: 16px;
+    font-weight: 500;
+    letter-spacing: 0.44em;
+    text-indent: 0.44em;
+    color: #4a4038;
+  }
+  .label .rule-thin {
+    width: 420px;
+    height: 1px;
+    background: #cdc2b1;
+    margin: 18px 0 15px;
+  }
+  .label .lot {
+    display: flex;
+    justify-content: space-between;
+    width: 420px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: #2a2320;
+  }
+
+  /* ── Weight block, between label and window ──────────────────────────── */
+  .grind {
+    position: absolute;
+    inset-inline: 0;
+    top: 888px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    text-indent: 0.3em;
+    color: #9b8f80;
+  }
+  .weight {
+    position: absolute;
+    inset-inline: 0;
+    top: 914px;
+    text-align: center;
+    font-family: "Playfair Display", "Bodoni MT", Didot, Georgia, serif;
+    font-size: 44px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: #d8ab68;
+  }
+
+  /* ── Bean window ─────────────────────────────────────────────────────── */
+  .window {
+    position: absolute;
+    left: 90px;
+    top: 995px;
+    width: 500px;
+    height: 193px;
+    border: 2px solid #8a6a34;
+    background: #120d09;
+    overflow: hidden;
+  }
+
+  .batches {
+    position: absolute;
+    inset-inline: 0;
+    top: 1218px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    text-indent: 0.3em;
+    color: #7d7264;
+  }
+</style>
+</head>
+<body>
+<div class="panel">
+  <div class="foil"></div>
+  <div class="crimp"></div>
+
+  <!-- Gold roundel: ring, serif M, two coffee leaves. Vector, so it stays
+       crisp when the camera pushes in on beats 2 and 3. -->
+  <svg class="roundel" viewBox="0 0 206 206" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="103" cy="103" r="99" stroke="#c9a25f" stroke-width="3" />
+    <text
+      x="103" y="121" text-anchor="middle"
+      font-family="'Playfair Display', 'Bodoni MT', Didot, Georgia, serif"
+      font-size="92" font-weight="500" fill="#d8ab68"
+    >M</text>
+    <path d="M103 140v34" stroke="#c9a25f" stroke-width="2.6" stroke-linecap="round" />
+    <path d="M100 145c-14 4-24 15-26 29 14-2 24-13 26-29z" fill="#c9a25f" opacity="0.94" />
+    <path d="M106 145c14 4 24 15 26 29-14-2-24-13-26-29z" fill="#c9a25f" opacity="0.94" />
+  </svg>
+
+  <div class="label">
+    <div class="rule-gold"></div>
+    <div class="origin">SINGLE ORIGIN</div>
+    <div class="wordmark">MERIDIAN</div>
+    <div class="specialty">SPECIALTY</div>
+    <div class="rule-thin"></div>
+    <div class="lot"><span>GUJI</span><span>ETHIOPIA</span></div>
+  </div>
+
+  <div class="grind">NATURAL · WHOLE BEAN</div>
+  <div class="weight">1 KG</div>
+
+  <div class="window"><svg id="beans" viewBox="0 0 500 193" xmlns="http://www.w3.org/2000/svg"></svg></div>
+
+  <div class="batches">ROASTED IN SMALL BATCHES</div>
+</div>
+
+<script>
+  /**
+   * The beans behind the window.
+   *
+   * Seeded, so re-rendering this file produces a byte-identical PNG — an
+   * asset that changes every build is an asset nobody can review a diff of.
+   */
+  function rng(seed) {
+    let s = seed >>> 0;
+    return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296);
+  }
+
+  const svg = document.getElementById("beans");
+  const rand = rng(20260821);
+  const palette = ["#4a2c17", "#5c3a1e", "#6b4526", "#3d2412", "#503018"];
+  const parts = [];
+
+  for (let i = 0; i < 210; i++) {
+    const cx = rand() * 520 - 10;
+    const cy = rand() * 213 - 10;
+    const rx = 13 + rand() * 5;
+    const ry = 9 + rand() * 3.5;
+    const rot = rand() * 180;
+    const fill = palette[Math.floor(rand() * palette.length)];
+    parts.push(
+      '<g transform="translate(' + cx.toFixed(1) + ' ' + cy.toFixed(1) + ') rotate(' + rot.toFixed(1) + ')">' +
+        '<ellipse rx="' + rx.toFixed(1) + '" ry="' + ry.toFixed(1) + '" fill="' + fill + '"/>' +
+        // The centre crease is the whole reason a bean reads as a bean.
+        '<path d="M-' + (rx - 2).toFixed(1) + ' 0 Q 0 ' + (ry * 0.55).toFixed(1) + ' ' + (rx - 2).toFixed(1) + ' 0" ' +
+          'stroke="#26160b" stroke-width="1.6" fill="none" opacity="0.85"/>' +
+      "</g>"
+    );
+  }
+  svg.innerHTML = parts.join("");
+</script>
+</body>
+</html>

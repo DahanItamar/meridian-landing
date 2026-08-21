@@ -1,41 +1,76 @@
 @import "tailwindcss";
 
 /**
- * Meridian theme tokens.
+ * Meridian theme tokens — the warm foil palette of `Meridian Landing.dc.html`.
  *
- * Semantic names only — components reference `bg-surface`, never `bg-stone-950`.
- * Swapping the palette is meant to be an edit to this block and nothing else, so
- * if you ever find yourself changing a component to change a colour, a token is
- * missing (constitution, Naming).
+ * Semantic names only. Components reference `text-subtle`, never `text-[#8e857a]`,
+ * so swapping the palette is an edit to this block and nothing else (constitution,
+ * Naming). If you find yourself changing a component to change a colour, a token
+ * is missing.
  *
- * Every pair below was measured against its own background, not eyeballed:
- *   ink    on surface  18.88:1
- *   muted  on surface   9.48:1   (was 7.26 — the page read muddy, this is why)
- *   brand  on surface   7.90:1   (was 5.38)
- *   gold   on surface  10.78:1
- *   ink    on brand     7.52:1   (button label)
- *   edge   on surface   3.81:1   (form borders, focus rings — WCAG 1.4.11 wants 3:1)
- *   line   on surface   1.22:1   (decorative hairlines only, deliberately below 3:1)
+ * Contrast, measured against the surface it is actually drawn on rather than
+ * eyeballed:
+ *
+ *   ink            on surface  17.76:1
+ *   muted          on surface  12.05:1   body copy in the beats
+ *   muted-2        on surface   9.50:1   nav links
+ *   gold           on surface   8.40:1   kickers, figures, the buy button ground
+ *   error          on surface   9.11:1
+ *   subtle         on surface   5.51:1   row labels, form labels
+ *   faint          on surface   4.54:1   footer blurb, consent note
+ *   fainter        on surface   4.52:1   legal links, the stage label
+ *   edge           on surface   3.03:1   control borders — WCAG 1.4.11 wants 3:1
+ *   ink-inverse    on brand    17.76:1   primary button label
+ *   ink-inverse    on gold      8.40:1   buy button label
+ *   card-line      on surface   1.14:1   card borders, below 3:1 on purpose
+ *   line           on surface   1.11:1   section hairlines, decorative
+ *
+ * Four values diverge from the mockup, all upward, all for the same reason the
+ * previous design's did. The design draws `faint` at #7e766c (4.47:1, a hair
+ * under AA), `fainter` at #6b6157 (3.31:1), and both the ghost-button and the
+ * input borders at #4a423b / #3a3430 (2.03:1 and 1.63:1). The first two are
+ * text and the last two are control boundaries, so each is lifted along its own
+ * hue to the first value that passes. Nothing else about the design moved.
+ *
+ * `hairline-decor` is the design's original #4a423b, kept for the scroll-hint
+ * mouse outline — that one is aria-hidden ornament, not a control, so 1.4.11
+ * does not reach it and lifting it would draw the eye to the wrong thing.
  */
 @theme {
-  --color-surface: #0a0807;
-  --color-surface-raised: #17120f;
-  --color-surface-deep: #050403;
+  --color-surface: #08080a;
+  --color-surface-raised: #100e0d;
 
-  --color-ink: #fbf8f4;
-  --color-ink-inverse: #140f0c;
-  --color-muted: #c0b0a0;
-  --color-muted-inverse: #6b6058;
+  --color-ink: #f5f1e9;
+  --color-ink-inverse: #08080a;
+  --color-muted: #cfc8bd;
+  --color-muted-2: #b8b2a8;
+  --color-subtle: #8e857a;
+  --color-faint: #7f776d;
+  --color-fainter: #82766a;
 
-  --color-brand: #d9944e;
-  --color-brand-hover: #e8a863;
-  --color-gold: #e3b77c;
+  /* The one colour on the page. Everything else is foil and cream. */
+  --color-gold: #c9a25f;
+  --color-gold-hover: #e3b77c;
 
-  --color-line: #2a211c;
-  --color-edge: #7a695c;
+  /* The primary action is cream on near-black; the buy action is gold. */
+  --color-brand: #f5f1e9;
+  --color-brand-hover: #fffbf3;
 
-  --font-display: var(--font-display), ui-sans-serif, system-ui, sans-serif;
-  --font-body: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  --color-line: #191614;
+  --color-card-line: #1c1917;
+  --color-edge: #665b51;
+  --color-hairline-decor: #4a423b;
+
+  --color-error: #e0a08a;
+
+  /* The next/font variables are named for the face, not for the role, so these
+     tokens are not defined in terms of themselves. `--font-body: var(--font-body)`
+     is a self-referencing custom property, which computes to invalid and drops
+     the family silently — the page then renders in the UA serif and nothing in
+     the build says why. */
+  --font-display: var(--font-heebo), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-heebo), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, "SFMono-Regular", monospace;
 
   --radius-card: 0.75rem;
 }
@@ -44,13 +79,14 @@
  * Direction-agnostic by construction.
  *
  * AC-007 requires every directional value to be logical. `text-align: start`
- * here means no component needs `text-left`, which is the single most common
- * way an RTL layout breaks without anyone noticing in English.
+ * here means no component needs `text-left` — the single most common way an RTL
+ * layout breaks without anyone noticing, and this page is Hebrew.
  */
 html {
   text-align: start;
   -webkit-text-size-adjust: 100%;
   color-scheme: dark;
+  scroll-behavior: smooth;
 }
 
 body {
@@ -67,28 +103,345 @@ h3 {
   text-wrap: balance;
 }
 
-/** Display type: tight, heavy, uppercase. Set once so headings stay consistent. */
-.display {
-  font-weight: 800;
-  letter-spacing: -0.035em;
-  line-height: 0.92;
-  text-transform: uppercase;
+::selection {
+  background: var(--color-gold);
+  color: var(--color-ink-inverse);
 }
 
 /**
  * A visible focus indicator on every interactive element (AC-030). Defined once,
- * here, so no component can remove it with `outline: none` and leave keyboard
- * users stranded — the most common accessibility failure in modern codebases.
+ * here, so no component can remove it with `outline: none` and strand keyboard
+ * users — the most common accessibility failure in modern codebases.
  */
 :focus-visible {
-  outline: 2px solid var(--color-brand);
+  outline: 2px solid var(--color-gold);
   outline-offset: 3px;
   border-radius: 2px;
 }
 
 /**
+ * A beat of copy in the pinned sequence.
+ *
+ * Below lg there is no second half of the frame for the camera to vacate — the
+ * pack fills the viewport — so the copy is anchored to the upper third over a
+ * scrim rather than centred over the pack's own label, where it was text on
+ * texture and simply could not be read. lib/scrolly-config.ts aims the camera
+ * higher at the same breakpoint so the pack drops into the space below.
+ *
+ * The vertical centring lives here rather than in the inline transform because
+ * only one of the two cases subtracts half its own height, and an inline style
+ * cannot carry a media query. `--beat-y` is the fade offset, set per frame.
+ */
+.beat {
+  transform: translateY(var(--beat-y));
+  padding: 1.25rem 1rem 3rem;
+  border-radius: var(--radius-card);
+  background: linear-gradient(
+    180deg,
+    rgba(8, 8, 10, 0.93) 0%,
+    rgba(8, 8, 10, 0.86) 58%,
+    rgba(8, 8, 10, 0) 100%
+  );
+}
+
+@media (min-width: 64rem) {
+  .beat {
+    transform: translateY(calc(-50% + var(--beat-y)));
+    padding: 0;
+    background: none;
+  }
+}
+
+/**
+ * The z-index scale. Four values, and nothing on this page may invent a fifth.
+ *
+ * Written down because the alternative is what was here before: a nav at 200
+ * and a beat layer at 20, chosen far apart in the hope they would never meet.
+ * Components that layer internally take `isolation: isolate` instead, which
+ * keeps their own z-indexes local and unable to reach the page at all.
+ */
+:root {
+  --z-raised: 1;
+  --z-sticky: 10;
+  --z-nav: 20;
+  --z-overlay: 30;
+}
+
+/**
+ * Buttons.
+ *
+ * One recipe, three skins. The class exists because the same string of
+ * utilities was pasted at four call sites and had drifted at three of them —
+ * and because states are the part that gets forgotten when a button is a
+ * string, not a thing.
+ *
+ * `:active` moves the button a single pixel down. That is the whole press
+ * feedback and it is enough: a real control acknowledges being touched, and a
+ * transform is the only way to say so that costs no layout.
+ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  font-weight: 700;
+  text-align: center;
+  cursor: pointer;
+  /* Named properties, never `all` — this element also carries a transform, and
+     `all` would animate the press against the colour change. */
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease,
+    color 140ms ease,
+    transform 120ms ease;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn:disabled,
+.btn[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.5;
+  transform: none;
+}
+
+.btn-solid {
+  background-color: var(--color-brand);
+  color: var(--color-ink-inverse);
+}
+.btn-solid:hover:not(:disabled) {
+  background-color: var(--color-brand-hover);
+}
+
+.btn-gold {
+  background-color: var(--color-gold);
+  color: var(--color-ink-inverse);
+}
+.btn-gold:hover:not(:disabled) {
+  background-color: var(--color-gold-hover);
+}
+
+.btn-ghost {
+  border-color: var(--color-edge);
+  color: var(--color-ink);
+}
+.btn-ghost:hover:not(:disabled) {
+  border-color: var(--color-gold);
+  color: var(--color-gold-hover);
+}
+
+/**
+ * Text inputs.
+ *
+ * The border is the focus indicator, not an outline: gold on the raised
+ * surface measures 8.4:1, well past the 3:1 AC-030 asks for, and an outline on
+ * top of it draws two rings around one field. The global `:focus-visible` rule
+ * is therefore suppressed here specifically, rather than by an `outline-none`
+ * utility sitting in the markup where nobody can see why.
+ *
+ * `aria-invalid` drives a visible border too. An error that only exists in the
+ * accessibility tree is an error sighted users have to guess at.
+ */
+.field {
+  border: 1px solid var(--color-edge);
+  background-color: var(--color-surface-raised);
+  color: var(--color-ink);
+  border-radius: 10px;
+  transition:
+    border-color 140ms ease,
+    background-color 140ms ease;
+}
+.field:hover:not(:focus) {
+  border-color: var(--color-subtle);
+}
+.field:focus {
+  border-color: var(--color-gold);
+}
+.field:focus-visible {
+  outline: none;
+}
+.field[aria-invalid="true"] {
+  border-color: var(--color-error);
+}
+
+/** Small text links need a hit area the text alone does not give them (AC-052). */
+.tap {
+  display: inline-block;
+  padding-block: 0.375rem;
+}
+
+/**
+ * The success mark.
+ *
+ * Drawn rather than played. A Lottie runtime is roughly 70 kB gzip on top of
+ * the 227 kB of WebGL this page already loads above the fold, for one moment a
+ * visitor sees once after converting — and AC-037's Lighthouse floor is the
+ * criterion most at risk here. Two stroke-dash animations cost nothing and say
+ * the same thing.
+ *
+ * The ring draws, then the tick. Under reduced motion the global rule collapses
+ * both durations, and because each is `forwards` the mark lands complete rather
+ * than disappearing — a decorative animation that hides content when it is
+ * disabled is worse than no animation.
+ */
+.mark-ring {
+  stroke-dasharray: 151;
+  stroke-dashoffset: 151;
+  animation: mark-ring 520ms cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+
+.mark-tick {
+  stroke-dasharray: 36;
+  stroke-dashoffset: 36;
+  animation: mark-tick 300ms 400ms cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+
+@keyframes mark-ring {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes mark-tick {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/**
+ * The consent checkbox.
+ *
+ * Still a real `<input type="checkbox">`, with `appearance: none` so the box
+ * can be drawn — not a div pretending. This is the one control on the page with
+ * a statute behind it, and a custom widget would have to re-earn the role, the
+ * announced checked state, the space-bar toggle and the label association that
+ * the native element has for free.
+ *
+ * The tick draws rather than appearing, on the same stroke-dash idea as the
+ * success mark, driven purely by `:checked` — no JavaScript, no library, and no
+ * runtime for a 24-pixel animation. Under reduced motion the global rule
+ * collapses the duration and the tick simply is there, which is the correct
+ * degraded state for a control that reports a legal fact.
+ */
+.consent-control {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  margin-top: 0.1rem;
+}
+
+.consent-box {
+  appearance: none;
+  width: 1.15rem;
+  height: 1.15rem;
+  margin: 0;
+  border: 1px solid var(--color-edge);
+  border-radius: 5px;
+  background-color: var(--color-surface-raised);
+  cursor: pointer;
+  transition:
+    border-color 140ms ease,
+    background-color 140ms ease;
+}
+
+.consent-box:hover:not(:checked) {
+  border-color: var(--color-subtle);
+}
+
+.consent-box:checked {
+  border-color: var(--color-gold);
+  background-color: var(--color-gold);
+}
+
+.consent-box[aria-invalid="true"] {
+  border-color: var(--color-error);
+}
+
+.consent-tick {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  color: var(--color-ink-inverse);
+  pointer-events: none;
+}
+
+.consent-tick path {
+  stroke-dasharray: 22;
+  stroke-dashoffset: 22;
+  transition: stroke-dashoffset 240ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.consent-box:checked ~ .consent-tick path {
+  stroke-dashoffset: 0;
+}
+
+/**
+ * Nothing scrolls under the fixed header (AC-053, WCAG 2.2 SC 2.4.11).
+ *
+ * `JumpLink` handles in-page clicks, but it cannot help someone who arrives with
+ * `#waitlist` already in the URL — a shared link, a bookmark, a browser
+ * restoring a session. The browser scrolls those to the exact top of the target,
+ * which is underneath the header.
+ *
+ * Logical, not `scroll-margin-top`: the header is block-start in any writing
+ * mode, and the repository check treats physical directional values as a defect
+ * for good reason. The value is the header's own height plus room to breathe.
+ */
+:target,
+section[id],
+[id]:focus-visible {
+  scroll-margin-block-start: 5.5rem;
+}
+
+/**
+ * The beans, bouncing, while the 3D pack loads.
+ *
+ * A SMIL animation inside an `<img>`, which is why it is here and not a
+ * component: 5 kB of markup that the browser animates natively, with no runtime
+ * and no hydration. It loops, so it stops the moment the canvas is ready.
+ *
+ * SMIL cannot be paused from CSS, so reduced motion hides it outright rather
+ * than freezing it mid-bounce. Nothing is lost by that — the poster frame
+ * underneath is already showing the product, and the indicator only ever said
+ * "there is more of this coming".
+ */
+.beans-loader {
+  width: 72px;
+  height: 72px;
+  transition: opacity 350ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .beans-loader {
+    display: none;
+  }
+}
+
+/** The live dot beside the stage label. Opacity only — nothing moves. */
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/**
  * AC-015: honour reduced motion globally rather than per-component, so a
  * component added later inherits the guarantee instead of having to remember it.
+ *
+ * This covers CSS only. The pinned sequence is scroll-driven rather than
+ * animated — it moves because the user is moving, which is not what 2.3.3 is
+ * about — but the camera still damps toward its target, and PackStage tightens
+ * that damping to near-instant under the same query so nothing keeps gliding
+ * after the scrollbar stops.
  */
 @media (prefers-reduced-motion: reduce) {
   *,

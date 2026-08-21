@@ -1,0 +1,25 @@
+# Build artefacts and dependencies — the image builds its own.
+node_modules
+.next
+out
+
+# Never copy secrets into a build context.
+.env
+.env.local
+.env*.local
+
+# Source that the runtime image has no use for.
+art/
+docs/
+shots/
+scripts/
+*.md
+.git
+.gitignore
+.vscode
+.idea
+
+# The raw model exports are the input to scripts/pack-model.mjs, not runtime
+# assets. public/models/ holds the derived 2 MB file and is copied.
+*.glb
+!public/models/*.glb
