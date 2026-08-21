@@ -49,6 +49,21 @@ and looks like a different bug entirely. The Dockerfile does the same two copies
 Windows the next `next build` blocks on the locked directory rather than failing
 with anything that names the cause.
 
+## Which nginx config
+
+Two are provided and they are not interchangeable:
+
+| File | Use when |
+| --- | --- |
+| `nginx.cloudflare.conf.example` | Cloudflare terminates in front of nginx — **this is the live setup** |
+| `nginx.conf.example` | nginx is the only proxy, direct to origin |
+
+The difference is not cosmetic. Behind Cloudflare the app keys its per-IP limit
+on `CF-Connecting-IP`, and that header is only trustworthy because the server
+block `403`s any socket outside the Cloudflare ranges (AC-077). Use the direct
+config behind Cloudflare and the limit can be bypassed with a forged header; use
+the Cloudflare config without Cloudflare and every visitor gets a 403.
+
 ## nginx
 
 ```bash
@@ -80,7 +95,7 @@ real client address rather than the proxy's.
 docker logs meridian | tail
 ```
 
-If every request appears to come from `127.0.0.1`, the `X-Forwarded-For` header
+If every request appears to come from `127.0.0.1`, the `CF-Connecting-IP` header
 is not arriving and AC-023's per-IP rate limit behaves as a single global
 bucket. That failure passes every local test.
 

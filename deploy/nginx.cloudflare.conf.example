@@ -1,0 +1,121 @@
+# meridian.itamardahan.com — the Cloudflare-fronted server block (AC-042, AC-055, AC-077).
+#
+# This supersedes nginx.conf.example on a host where Cloudflare terminates in
+# front of nginx. Keep the other file: it is still the correct shape for a
+# direct-to-origin deployment, and the two differ in ways that matter.
+#
+# Install:
+#   cp nginx.cloudflare.conf.example /etc/nginx/sites-available/meridian
+#   ln -s /etc/nginx/sites-available/meridian /etc/nginx/sites-enabled/
+#   nginx -t && systemctl reload nginx
+#   certbot --nginx -d meridian.itamardahan.com     # adds the TLS lines below
+#
+# Certbot rewrites this file when it issues. That is expected — everything it
+# adds is marked "managed by Certbot" and everything above is ours.
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name meridian.itamardahan.com;
+
+    # ── The Cloudflare gate (AC-077) ─────────────────────────────────────────
+    #
+    # Two things, and they are a pair with lib/rate-limit.ts.
+    #
+    # The snippet sets real_ip_header to CF-Connecting-IP, so $remote_addr
+    # becomes the visitor rather than Cloudflare. The app then keys AC-023's
+    # per-IP limit on that header.
+    #
+    # The 403 is what makes that header trustworthy. CF-Connecting-IP is only
+    # unforgeable because Cloudflare overwrites whatever the caller sent — which
+    # is worth nothing if the caller can skip Cloudflare and reach nginx
+    # directly. Anyone who finds the origin address could otherwise set the
+    # header themselves and get an unlimited number of requests past the limit.
+    #
+    # $from_cloudflare is keyed on $realip_remote_addr — the address that
+    # actually opened the socket — because real_ip has by this point rewritten
+    # $remote_addr to the visitor, and matching on that would allowlist visitors
+    # instead of Cloudflare.
+    #
+    # /etc/nginx/conf.d/cloudflare.conf defines $from_cloudflare; both it and
+    # the snippet are regenerated weekly by refresh-cloudflare-ips.sh. A stale
+    # list 403s real people, which is the safe direction to fail.
+    include snippets/cloudflare-realip.conf;
+    if ($from_cloudflare = 0) {
+        return 403;
+    }
+
+    # ── Headers ──────────────────────────────────────────────────────────────
+    #
+    # snippets/security-headers.conf is deliberately NOT included. Its CSP sets
+    # `script-src 'self'` with no 'unsafe-inline', and browsers enforce the
+    # INTERSECTION of multiple CSP headers — including it would override what is
+    # set here, block Next's inline hydration bootstrap, and leave a page that
+    # returns 200 and does nothing. The same note is on the gitcheckup block,
+    # for the same reason.
+    add_header Strict-Transport-Security "max-age=63072000; includeSubDomains" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "DENY" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), interest-cohort=()" always;
+
+    # 'unsafe-inline' on script-src is Next's inline bootstrap, not a choice.
+    # blob: on worker-src and img-src is three.js — it creates object URLs for
+    # decoded texture data. connect-src is 'self' alone: nothing on this site
+    # calls anything external, and if Umami is ever configured its host has to be
+    # added here or its beacon is blocked silently.
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; worker-src 'self' blob:; media-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'" always;
+
+    # ── Proxy ────────────────────────────────────────────────────────────────
+    #
+    # 3100, not 3000 — gitcheckup already holds 3000 on this host.
+    location / {
+        proxy_pass http://127.0.0.1:3100;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+
+        # The visitor, not Cloudflare: real_ip has already substituted
+        # $remote_addr from CF-Connecting-IP above.
+        proxy_set_header CF-Connecting-IP $remote_addr;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # X-Forwarded-For is passed through for logging only. The app does not
+        # read it — behind Cloudflare its leading entries are caller-controlled.
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+
+    # Content-hashed by the build, so the filename changes when the bytes do.
+    location /_next/static/ {
+        proxy_pass http://127.0.0.1:3100;
+        add_header Cache-Control "public, max-age=31536000, immutable";
+    }
+
+    # The model and the artwork are not content-hashed, so they get a long
+    # max-age with revalidation rather than immutable — replacing the pack
+    # without a filename change must not strand a year-old copy in a cache.
+    location ~* ^/(art|models)/ {
+        proxy_pass http://127.0.0.1:3100;
+        add_header Cache-Control "public, max-age=604800, must-revalidate";
+    }
+
+    # Never cached, and never logged with a body — it is the only endpoint that
+    # receives an email address, and §9 says the address lives only for the
+    # lifetime of the handler.
+    location /api/ {
+        proxy_pass http://127.0.0.1:3100;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header CF-Connecting-IP $remote_addr;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        add_header Cache-Control "no-store" always;
+    }
+
+    # AC-056. The default combined format logs $remote_addr, which real_ip has
+    # made the visitor's address — personal data under GDPR Art. 4(1). Kept
+    # because it is what makes an abuse investigation possible at all, and
+    # rotated by the distro default at /etc/logrotate.d/nginx (14 days).
+    access_log /var/log/nginx/meridian.access.log;
+    error_log  /var/log/nginx/meridian.error.log;
+}

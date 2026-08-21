@@ -1,8 +1,9 @@
 # 01 — Meridian Landing Page — Technical Spec
 
-> Status: Draft · 2026-08-21 · Spec version 3.1
+> Status: Draft · 2026-08-22 · Spec version 3.2
 > Merged: 0001 — coffee pivot, WebGL hero, Hebrew-only · 0003 — drop the email pipeline ·
-> 0004 — retire the marketing-message criterion · 0005 — accessibility menu
+> 0004 — retire the marketing-message criterion · 0005 — accessibility menu ·
+> 0006 — Cloudflare in front of the origin
 > Compliance basis: ACSM modules 1, 3, 4, 6, 8 · markets Israel + EU · see §13
 > Governed by `docs/CONSTITUTION.md` v1.3
 
@@ -108,7 +109,7 @@ reduced-motion, and a ≥90 Lighthouse score, running on infrastructure you own.
 | AC-039 | The container shall listen on the port given by `PORT`, defaulting to 3000. |
 | AC-040 | `GET /api/health` shall respond `200` with `{ ok: true }` whenever the process is serving, and shall contact no upstream service. |
 | ~~AC-041~~ | **Retired** by 0003 — both variables cease to exist, so behaviour on their absence is not a requirement. |
-| AC-042 | The deployment shall serve the site over HTTPS at its subdomain, with nginx forwarding the originating client IP in `X-Forwarded-For`. |
+| AC-042 | The deployment shall serve the site over HTTPS at its subdomain, with nginx forwarding the originating client IP in `CF-Connecting-IP`, and shall resolve `$remote_addr` from that header via the real_ip module. *(Amended by 0006.)* |
 | AC-043 | The repository shall contain desktop and mobile captures under `shots/`. |
 | AC-044 | The email capture form shall present an unticked consent checkbox, separate from every other control, and shall refuse submission until it is ticked. |
 | ~~AC-045~~ | **Retired** by 0003 — no contact to record anything on. The consent version stays in the content module; it identifies the wording, which is not the same as a field on a vendor's record. |
@@ -143,6 +144,7 @@ reduced-motion, and a ≥90 Lighthouse score, running on infrastructure you own.
 | AC-074 | While motion is stopped from the accessibility menu, the site shall halt the WebGL camera as well as CSS animation and smooth scrolling. |
 | AC-075 | The accessibility menu shall retain its settings across navigation within the site. |
 | AC-076 | The accessibility menu shall link to the accessibility statement and shall state that it does not replace the accessibility of the site itself. |
+| AC-077 | The server block shall refuse, with `403`, any connection whose socket address is outside the published Cloudflare ranges, so that `CF-Connecting-IP` cannot be set by anything but Cloudflare. |
 
 ## 3. Architecture
 
@@ -184,7 +186,7 @@ components, differing only in which content module they load and which `dir` the
 
 | Component | Responsibility | Technology |
 | --- | --- | --- |
-| nginx | TLS termination, subdomain routing, sets `X-Forwarded-For`. Owns no application logic. | nginx on the VPS, outside this repo |
+| nginx | TLS termination, subdomain routing, the Cloudflare 403 gate, and `$remote_addr` resolved from `CF-Connecting-IP`. Owns no application logic. | nginx on the VPS, outside this repo |
 | Container | Runs one Next.js process. Stateless apart from the rate-limit window. | Docker, `node:20-alpine`, non-root |
 | Page shell | Sets `lang`/`dir`, loads the content module, composes sections. No layout of its own. | Next.js 15 App Router, single root route |
 | Section components | Render one section each from props. Never fetch, never read the locale directly. | React 19 server components, except where motion or state forces `"use client"` |
@@ -244,13 +246,16 @@ Instead of: Redis — correct for multi-instance deployments and unnecessary for
 Revisit if: this site is ever horizontally scaled to more than one replica, which immediately breaks
 the guarantee.
 
-**Client IP taken from `X-Forwarded-For`, trusting exactly one proxy hop** — nginx is the only thing
-in front.
-Because: behind a reverse proxy the socket address is always the proxy, so every request would share
-one bucket and the limit would be global rather than per-client.
-Instead of: trusting the raw socket — makes AC-023 wrong in production while passing locally, which
-is the worst kind of bug.
-Revisit if: a CDN is ever placed in front of nginx, adding a second hop.
+**Client IP taken from `CF-Connecting-IP`** (0006)
+Because: Cloudflare terminates in front of nginx, and it *appends* to a caller-supplied
+`X-Forwarded-For` instead of replacing it — so the first entry is attacker-controlled, and AC-023
+keyed on it would be no limit at all. `CF-Connecting-IP` is a single address Cloudflare writes over
+anything the caller sent.
+Instead of: the first `X-Forwarded-For` entry — the original choice, correct while nginx was the only
+hop, and retired by the second one arriving exactly as its own "revisit if" predicted.
+Depends on: AC-077's 403 gate. Without it any host that finds the origin address can set the header,
+and this decision becomes *less* safe than the one it replaced.
+Revisit if: Cloudflare is removed, or a second CDN is added.
 
 **Motion in leaf components only** — a `Reveal` wrapper marked `"use client"`, wrapping otherwise
 server-rendered sections.
@@ -421,8 +426,9 @@ Contract details, not commentary:
 - `502 upstream_failed` survives 0003 as the catch-all: the route keeps a boundary that must
   answer with a code (AC-021, AC-057), and an unexpected throw is now the only thing that
   produces it.
-- Client IP for rate limiting is the first entry of `X-Forwarded-For`, falling back to the socket
-  address when the header is absent (local development).
+- Client IP for rate limiting is `CF-Connecting-IP`, falling back to `X-Real-IP` and then to a
+  single shared bucket when neither is present (local development). `X-Forwarded-For` is not
+  consulted: behind Cloudflare it carries caller-controlled entries (0006).
 
 ### Routes
 
@@ -454,9 +460,10 @@ docker run -d --name meridian --restart unless-stopped \
   meridian
 ```
 
-Published to loopback only — nginx is the sole public listener. The nginx server block for
-`meridian.<domain>` lives in `deploy/nginx.conf.example` and must set `X-Forwarded-For`, or AC-023
-silently becomes a global limit.
+Published to loopback only — nginx is the sole public listener, and Cloudflare is the only thing
+permitted to reach nginx (AC-077). The server block for `meridian.itamardahan.com` lives in
+`deploy/nginx.cloudflare.conf.example`; it must include the Cloudflare real_ip snippet and the 403
+gate, or AC-023's limit can be bypassed with a forged header.
 
 ## 7. Core Flows
 
@@ -514,7 +521,7 @@ runtime.
 | --- | --- | --- | --- |
 | Bot fills every field | Junk submissions | Honeypot field; silent `200`, identical to success | AC-022 |
 | Script hammers the endpoint | Quota exhaustion | Per-IP limit, 5/60s → `429` | AC-023 |
-| nginx does not forward the client IP | Every visitor shares one bucket; the limit becomes global | `X-Forwarded-For` required in the server block; documented in `deploy/` | AC-023 |
+| The 403 gate is removed or misconfigured | `CF-Connecting-IP` becomes settable by any caller that finds the origin address, and the per-IP limit becomes unlimited | The gate and the header are documented as a pair, at `clientKey` and in `deploy/` | AC-023, AC-077 |
 | Container restarts | Rate-limit window resets | Accepted — the honeypot still applies, and the blast radius is one 60s window | §3 Decisions |
 | User has reduced-motion enabled | Vestibular discomfort; content invisible if the reveal never fires | Final state rendered directly, no observer | AC-015 |
 | JS disabled or failed to load | Form is inert with no explanation | All content is server-rendered; the form is a real `<form>` and submit is progressively enhanced | AC-008 |
@@ -589,14 +596,14 @@ call is made.
 - [x] Logical properties throughout — closes AC-007
 - [x] `GET /api/health` — closes AC-040
 - [x] Dockerfile on `standalone`, non-root, `PORT` honoured — closes AC-038, AC-039
-- [x] `deploy/nginx.conf.example` with TLS 1.3, HSTS, CSP, `X-Forwarded-For`, log policy — closes AC-042, AC-055, AC-056
+- [x] `deploy/nginx.cloudflare.conf.example` with TLS, HSTS, the 403 gate, `CF-Connecting-IP` real_ip, log policy — closes AC-042, AC-055, AC-056
 - [x] Desktop and mobile captures under `shots/` — closes AC-043
 
 
 **M2 — The form actually works** ✅ *complete*
 *Demo: submit on the live site; pending, error, retry and success are all real.*
 - [x] `POST /api/subscribe`: typed contract, address validation, honeypot — closes AC-021, AC-022
-- [x] Per-IP rate limit, 5/60s, keyed on the first `X-Forwarded-For` entry — closes AC-023
+- [x] Per-IP rate limit, 5/60s, keyed on `CF-Connecting-IP` — closes AC-023
 - [x] Logging boundary: a code and nothing else reaches any log — closes AC-057
 - [x] Client submit flow: pending, disabled control, error with input retained, retry — closes AC-016, AC-019
 - [x] Umami, rendered only when configured, cookieless — closes AC-033
@@ -633,6 +640,7 @@ point a real address at this without flinching.*
 - [ ] nginx access-log IP handling and rotation policy — closes AC-056
 - [ ] Verify no cookie and no client-side storage in either locale — closes AC-059
 - [x] Assert no outbound message dependency: no mail client in the dependency tree, no send path in the code — closes AC-071
+- [ ] Cloudflare-gated server block, real_ip from CF-Connecting-IP, and the app keyed on it — closes AC-077
 - [ ] `docs/ROPA.md` and `docs/BREACH-RUNBOOK.md` — closes AC-058 · *0003 removed the processor, so there is no DPA to sign and the record would describe a system that processes nothing*
 
 ## 11. Assumptions

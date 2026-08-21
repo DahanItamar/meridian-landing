@@ -21,30 +21,48 @@ const MAX_KEYS = 10_000;
 const hits = new Map<string, number[]>();
 
 /**
- * The client's address, per SPEC.md §6.
+ * The client's address, per SPEC.md §6 as amended by proposal 0006.
  *
- * `X-Forwarded-For` is a list and the **first** entry is the originating client;
- * later entries are proxies. Taking the last would let anyone set their own key
- * by sending the header themselves, which turns a per-IP limit into no limit.
+ * `CF-Connecting-IP` FIRST, and deliberately not `X-Forwarded-For`.
  *
- * The app trusts exactly one hop, because nginx is the only thing in front —
- * `deploy/nginx.conf.example` sets the header. Putting a CDN in front adds a
- * second hop and this function has to change with it.
+ * This read the first `X-Forwarded-For` entry, on the stated assumption that
+ * nginx was the only thing in front — which was true until the site went behind
+ * Cloudflare. It is now false in the worst way: Cloudflare **appends** to a
+ * caller-supplied `X-Forwarded-For` rather than replacing it, so the first entry
+ * is whatever the caller wrote. A limiter keyed on that is not a limiter — every
+ * request can carry a fresh address and never reach the ceiling.
  *
- * The fallback exists for local development, where no proxy sets the header.
- * It buckets every caller together, which is wrong in production and harmless
- * on a laptop — and it is why the deploy README tells you to check that real
- * addresses arrive.
+ * `CF-Connecting-IP` is a single address that Cloudflare writes itself,
+ * overwriting anything the caller sent, so it cannot be forged from outside. It
+ * is trustworthy here for one reason and only that reason: the server block
+ * `return 403`s any connection that did not come from a Cloudflare range, so
+ * nothing else can reach this process to set it. **Remove that gate and this
+ * header becomes forgeable again** — the two are a pair, and neither is safe
+ * alone.
+ *
+ * `X-Real-IP` is the second choice: nginx sets it from `$remote_addr`, which
+ * the real_ip module has already rewritten from `CF-Connecting-IP`. Same value,
+ * one more hop of trust, so it is the fallback rather than the source.
+ *
+ * `X-Forwarded-For` is not consulted at all. Behind this topology it carries
+ * attacker-controlled entries and no information the two headers above lack.
+ *
+ * The "local" fallback exists for development, where no proxy sets anything. It
+ * buckets every caller together — wrong in production, harmless on a laptop, and
+ * why deploy/README.md tells you to confirm real addresses arrive.
  */
 export function clientKey(headers: Headers): string {
-  const forwarded = headers.get("x-forwarded-for");
-  if (forwarded) {
-    const first = forwarded.split(",")[0]?.trim();
-    if (first) return first;
+  const cf = headers.get("cf-connecting-ip");
+  if (cf) {
+    const addr = cf.trim();
+    if (addr) return addr;
   }
 
   const real = headers.get("x-real-ip");
-  if (real) return real.trim();
+  if (real) {
+    const addr = real.trim();
+    if (addr) return addr;
+  }
 
   return "local";
 }
