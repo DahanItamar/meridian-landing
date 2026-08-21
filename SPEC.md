@@ -1,7 +1,7 @@
 # 01 — Meridian Landing Page — Technical Spec
 
-> Status: Draft · 2026-08-21 · Spec version 2.0
-> Merged: change proposal 0001 — coffee pivot, WebGL hero, Hebrew-only
+> Status: Draft · 2026-08-21 · Spec version 3.0
+> Merged: 0001 — coffee pivot, WebGL hero, Hebrew-only · 0003 — drop the email pipeline
 > Compliance basis: ACSM modules 1, 3, 4, 6, 8 · markets Israel + EU · see §13
 > Governed by `docs/CONSTITUTION.md` v1.3
 
@@ -31,7 +31,7 @@ reduced-motion, and a ≥90 Lighthouse score, running on infrastructure you own.
 - Language toggle with full RTL layout inversion
 - Eight sections: hero, social proof, three feature blocks, specification grid, testimonials, FAQ,
   email capture, footer
-- Working email capture writing to a Resend audience
+- A working capture form — validated, rate-limited, honeypot-screened — that stores and transmits nothing
 - A privacy page, required because real addresses are collected
 - Scroll-triggered entrance motion, disabled under `prefers-reduced-motion`
 - Self-hosted cookieless analytics
@@ -85,14 +85,14 @@ reduced-motion, and a ≥90 Lighthouse score, running on infrastructure you own.
 | AC-017 | When the subscribe request succeeds, the site shall replace the form with a confirmation message in the active locale. |
 | AC-018 | If the submitted address is syntactically invalid, then the client shall render an inline validation message and shall issue no network request. |
 | AC-019 | If the subscribe request fails or times out, then the site shall render an error message, retain the entered address, and permit a retry. |
-| AC-020 | The subscribe route shall apply an 8-second timeout to its Resend call and shall treat expiry as a failure. |
+| ~~AC-020~~ | **Retired** by 0003 — no Resend call to time out. |
 | AC-021 | `POST /api/subscribe` shall respond `200` with `{ ok: true }` on success, and a 4xx or 5xx status with `{ ok: false, error: <code> }` otherwise. |
-| AC-022 | If the honeypot field is non-empty, then the subscribe route shall respond `200` without contacting Resend. |
+| AC-022 | If the honeypot field is non-empty, then the subscribe route shall respond `200` and shall take no further action. |
 | AC-023 | If more than 5 requests carry the same client IP within 60 seconds, then the subscribe route shall respond `429`. |
-| AC-024 | If the submitted address is already subscribed, then the subscribe route shall respond `200` and the site shall render the same confirmation as for a new subscription. |
-| AC-025 | The site shall never expose the Resend API key in a response body, a client bundle, or a build artifact. |
+| ~~AC-024~~ | **Retired** by 0003 — no list to be already on. Membership cannot be disclosed by a route that holds none. |
+| ~~AC-025~~ | **Retired** by 0003 — there is no Resend key, so this is vacuously true forever. A future secret needs its own criterion, not this one revived. |
 | AC-026 | The email capture section shall display a consent notice naming the purpose of collection and linking to the privacy page, in the active locale. |
-| AC-027 | The site shall serve a privacy page stating what is collected, the processor, the retention period, and a contact address for deletion requests. |
+| AC-027 | The site shall serve a privacy page stating what the form collects, that the address is neither stored nor transmitted, and that the brand and the product are a portfolio demonstration. |
 | AC-028 | The site shall render every raster image in the DOM through `next/image` with explicit `width` and `height`, and shall draw vector marks as inline SVG. |
 | ~~AC-029~~ | **Retired** by 0001 — no raster image in the DOM at all. Replaced by AC-061, which does the same job for the asset that actually blocks. |
 | AC-030 | Every interactive element shall present a visible focus indicator with at least 3:1 contrast against its adjacent background. |
@@ -106,14 +106,14 @@ reduced-motion, and a ≥90 Lighthouse score, running on infrastructure you own.
 | AC-038 | The Docker image shall build from the repository root with no arguments beyond build-time public env vars, and shall run as a non-root user. |
 | AC-039 | The container shall listen on the port given by `PORT`, defaulting to 3000. |
 | AC-040 | `GET /api/health` shall respond `200` with `{ ok: true }` whenever the process is serving, and shall contact no upstream service. |
-| AC-041 | If `RESEND_API_KEY` or `RESEND_AUDIENCE_ID` is absent at runtime, then the subscribe route shall respond `502 upstream_failed` and the rest of the site shall continue to serve. |
+| ~~AC-041~~ | **Retired** by 0003 — both variables cease to exist, so behaviour on their absence is not a requirement. |
 | AC-042 | The deployment shall serve the site over HTTPS at its subdomain, with nginx forwarding the originating client IP in `X-Forwarded-For`. |
 | AC-043 | The repository shall contain desktop and mobile captures under `shots/`. |
 | AC-044 | The email capture form shall present an unticked consent checkbox, separate from every other control, and shall refuse submission until it is ticked. |
-| AC-045 | When a subscription succeeds, the subscribe route shall record the consent text version, the submission timestamp in UTC, and the locale, as fields on the Resend contact. |
-| AC-046 | When the form is submitted, the site shall send a confirmation email containing a single-use link, and shall not treat the address as subscribed until that link is followed. |
+| ~~AC-045~~ | **Retired** by 0003 — no contact to record anything on. The consent version stays in the content module; it identifies the wording, which is not the same as a field on a vendor's record. |
+| ~~AC-046~~ | **Retired** by 0003 — double opt-in confirms an address for a sender that no longer exists. **The first thing to rebuild if the brand stops being fictional.** |
 | AC-047 | Every marketing message shall name the sender, identify itself as an advertisement in the locale it is sent in, and carry a free one-click opt-out valid for email. |
-| AC-048 | The privacy page shall state the controller identity, each purpose and its lawful basis, the recipients, the third-country transfer mechanism, the retention period, the full list of data-subject rights, the right to withdraw consent, and the right to complain to a supervisory authority. |
+| ~~AC-048~~ | **Retired** by 0003 — Art. 13 disclosure describes processing. There is none: no recipient, no transfer, no retention, because nothing is kept. |
 | AC-049 | The site shall serve an accessibility statement at `/accessibility`, linked from the footer, naming WCAG 2.2 Level AA, known limitations, and a named contact for accessibility problems. |
 | AC-050 | Every form input shall have a visible, programmatically associated label. A placeholder shall not serve as a label. |
 | AC-051 | When a form error or a submission result is rendered, the site shall associate it with its input and announce it through a live region. |
@@ -125,7 +125,7 @@ reduced-motion, and a ≥90 Lighthouse score, running on infrastructure you own.
 | AC-057 | The subscribe route shall write no email address, no API key and no request body to any log. |
 | AC-058 | The repository shall contain a record of processing activities and a breach-notification runbook naming the GDPR 72-hour clock and the Israeli Privacy Protection Authority route. |
 | AC-059 | The site shall set no cookie and shall write nothing to `localStorage`, `sessionStorage` or IndexedDB. |
-| AC-060 | The privacy page shall state that erasure and opt-out requests are answered within 30 days, and shall name the address that receives them. |
+| ~~AC-060~~ | **Retired** by 0003 — a response commitment for erasure of data that is never stored. |
 | AC-061 | The pinned section shall render a static poster of the pack in its server-rendered markup, and shall mount the WebGL canvas only after first paint. |
 | AC-062 | The pinned section shall reserve its full height before the canvas mounts, and mounting the canvas shall cause no layout shift. |
 | AC-063 | While the user agent reports `prefers-reduced-motion: reduce`, the pinned sequence shall follow scroll position without damping, and shall come to rest in the same frame the scroll stops. |
@@ -135,6 +135,7 @@ reduced-motion, and a ≥90 Lighthouse score, running on infrastructure you own.
 | AC-067 | Every navigation and footer link shall resolve to a section or route that exists. |
 | AC-068 | The launch countdown shall compute its target at render time and shall never display a zero or negative interval. |
 | AC-069 | The launch countdown shall not announce its per-second changes to assistive technology, and shall expose the remaining time as text that does not update every second. |
+| AC-070 | The waitlist section shall state that the site is a demonstration and that the address is neither stored nor transmitted, before the submit control. |
 
 ## 3. Architecture
 
@@ -142,8 +143,8 @@ reduced-motion, and a ≥90 Lighthouse score, running on infrastructure you own.
 
 A statically generated site with exactly one dynamic surface, running as a single long-lived Node
 process inside a container. Every page is prerendered at build time; the only server code in the
-product is a route that forwards an email address to Resend. There is no database, because nothing
-needs to be read back — Resend owns the list. Two locales are two prerendered variants of the same
+product is a route that validates a submission and answers. There is no database and no upstream,
+because nothing is kept and nothing is sent (0003). Two locales are two prerendered variants of the same
 components, differing only in which content module they load and which `dir` the document carries.
 
 ```
@@ -166,7 +167,7 @@ components, differing only in which content module they load and which `dir` the
                       │  HTTPS + Bearer — 8s timeout
                       ▼
         ┌──────────────────────────────┐
-        │  Resend Audience             │   owns the subscriber list
+        │  (no upstream)               │   nothing is sent anywhere
         └──────────────────────────────┘
 
         Browser ──── HTTPS ────▶ Umami (shared container, all five projects)
@@ -181,7 +182,7 @@ components, differing only in which content module they load and which `dir` the
 | Page shell | Sets `lang`/`dir`, loads the content module, composes sections. No layout of its own. | Next.js 15 App Router, single root route |
 | Section components | Render one section each from props. Never fetch, never read the locale directly. | React 19 server components, except where motion or state forces `"use client"` |
 | Content modules | Every user-facing string and all product data, one module per locale, both satisfying one type. | TypeScript, no runtime dependency |
-| Subscribe route | Validates, screens the honeypot, rate-limits, forwards to Resend. Stores nothing durable. | Next.js Route Handler, Node runtime |
+| Subscribe route | Validates, screens the honeypot, rate-limits, answers. Forwards nowhere and stores nothing. | Next.js Route Handler, Node runtime |
 | Health route | Reports that the process is serving, for Docker and nginx. | Next.js Route Handler |
 | Motion primitives | A reveal wrapper, reduced-motion aware. Used by the sections below the pinned sequence only. | `framer-motion` |
 | Pinned sequence | Measures scroll over its own container and publishes progress. Owns no geometry and no copy. | Client component, `getBoundingClientRect` in rAF |
@@ -218,12 +219,15 @@ original choice (0001 reversed it), and correct while the site was bilingual. Th
 still holds if a second language is ever committed to; restoring the segment is the work.
 Revisit if: a second locale is actually funded, rather than anticipated.
 
-**Resend, called from our own route** — the key never leaves the server.
-Because: the address is the conversion, and it should not depend on a third-party iframe or a
-branded free-tier response sitting in the critical path.
-Instead of: Formspree — less code, but puts a vendor's UI in the one interaction the page exists to
-produce.
-Revisit if: the list ever needs segmentation or automated sequences.
+**No email provider.** The route accepts, validates and answers; nothing is sent.
+Because: this is a portfolio demonstration of a fictional brand. A live pipeline means a service
+account, a signed DPA, a third-country transfer and Communications Law § 30A applying in full —
+real obligations acquired to demonstrate a form that already demonstrates itself without them.
+Instead of: Resend called from our own route — the original choice (0003 reversed it), and still
+correct the moment a real address is wanted. That reasoning was never refuted, only descoped: an
+address really is the conversion, and it really should not depend on a vendor's iframe.
+Revisit if: the brand stops being fictional. Restoring it is this decision reversed, AC-020/024/
+045/046 revived under new ids, and a DPA signed first.
 
 **In-memory per-IP rate limiting, in a module-scoped Map** — 5 requests per 60 seconds.
 Because: the container is one long-lived process, so this is genuinely reliable here. On serverless
@@ -349,7 +353,7 @@ export interface Content {
     emailPlaceholder: string;
     submit: string;
     consent: string;        // the checkbox's own label — the act, not a notice (AC-044)
-    consentVersion: string; // bumped on any wording change; recorded per contact (AC-045)
+    consentVersion: string; // identifies the wording a visitor agreed to. Not sent anywhere (0003)
     noticeBefore: string;   // purpose of collection, split so the link text is a string
     noticeLink: string;     // links the privacy page (AC-026)
     noticeAfter: string;
@@ -371,10 +375,7 @@ export interface SubscribeRequest {
   email: string;
   consent: true;            // literal true. An unticked box cannot form a valid request (AC-044)
   website: string;          // honeypot. Always empty from a real user (AC-022)
-  locale: "he";             // recorded on the Resend contact for future sends (AC-045).
-                            // A literal, not `Locale` — that type went with the
-                            // routing machinery in 0001. The field stays because
-                            // AC-045 names it; only its type collapsed.
+  locale: "he";             // a literal: one language ships. Kept for shape, sent nowhere (0003)
 }
 
 export type SubscribeError =
@@ -393,7 +394,7 @@ export type SubscribeResponse =
 - `Content` is the single source of truth for copy. `en.ts` and `he.ts` are both declared
   `satisfies Content`, so a missing key fails the build rather than rendering `undefined`.
 - `proof` and `testimonials` are fictional by construction and disclosed in the footer (AC-035).
-- No timestamps, no ids, no persistence — Resend owns the record and its lifecycle. The only
+- No timestamps, no ids, no persistence — there is no record to own. The only
   in-process state is the rate-limit window, which is intentionally lost on restart.
 
 ## 6. Interfaces
@@ -402,16 +403,16 @@ export type SubscribeResponse =
 
 | Signature | Purpose | Request → Response | Errors |
 | --- | --- | --- | --- |
-| `POST /api/subscribe` | Add an address to the Resend launch audience | `SubscribeRequest` → `SubscribeResponse` | `400 invalid_email` · `429 rate_limited` · `502 upstream_failed` |
+| `POST /api/subscribe` | Accept a launch-list submission. Validates, rate-limits, screens the honeypot, answers. Contacts nothing. | `SubscribeRequest` → `SubscribeResponse` | `400 invalid_email` · `400 consent_missing` · `429 rate_limited` · `502 upstream_failed` |
 | `GET /api/health` | Liveness for Docker and nginx | — → `{ ok: true }` | none; never contacts an upstream (AC-040) |
 
 Contract details, not commentary:
 
 - A non-empty `website` returns `200 { ok: true }` with no upstream call. A bot must not learn it was
   detected (AC-022).
-- An address already on the list returns `200 { ok: true }`. List membership is not disclosed
-  (AC-024).
-- The Resend call carries an 8-second `AbortSignal`; expiry maps to `502 upstream_failed` (AC-020).
+- `502 upstream_failed` survives 0003 as the catch-all: the route keeps a boundary that must
+  answer with a code (AC-021, AC-057), and an unexpected throw is now the only thing that
+  produces it.
 - Client IP for rate limiting is the first entry of `X-Forwarded-For`, falling back to the socket
   address when the header is absent (local development).
 
@@ -428,15 +429,13 @@ Contract details, not commentary:
 
 | Variable | Scope | Absent behavior |
 | --- | --- | --- |
-| `RESEND_API_KEY` | server only, runtime | subscribe returns `502`; the rest of the site serves normally (AC-041) |
-| `RESEND_AUDIENCE_ID` | server only, runtime | same |
 | `NEXT_PUBLIC_UMAMI_URL` | client, build time | analytics script is not rendered; no error |
 | `NEXT_PUBLIC_UMAMI_SITE_ID` | client, build time | same |
 | `PORT` | server, runtime | defaults to `3000` (AC-039) |
 
-The two Resend variables are never prefixed `NEXT_PUBLIC_`, which is what makes AC-025 true by
-construction rather than by discipline. The two Umami variables are public by nature — they identify
-a site, they do not authorise anything.
+There is no server-only variable left. 0003 removed the Resend pair with the pipeline, so every
+remaining variable is either operational (`PORT`) or public by nature — the Umami two identify a
+site, they do not authorise anything.
 
 ### Deployment
 
@@ -444,7 +443,6 @@ a site, they do not authorise anything.
 docker build -t meridian .
 docker run -d --name meridian --restart unless-stopped \
   -p 127.0.0.1:3001:3000 \
-  -e RESEND_API_KEY=... -e RESEND_AUDIENCE_ID=... \
   meridian
 ```
 
@@ -481,14 +479,15 @@ still DOM text (AC-054). A slow chunk delays the pack, never the headline.
 2. Visitor types an address and submits.
 3. Client validates syntactically. Invalid → inline message, no request issued (AC-018).
 4. Valid → submit disabled, pending state rendered (AC-016); `POST /api/subscribe` sent.
-5. Route reads `X-Forwarded-For`, screens the honeypot, then the rate limit, then forwards to Resend
-   with an 8s timeout.
+5. Route applies the rate limit, screens the honeypot, and answers. Nothing is forwarded — the
+   address is discarded when the handler returns (0003).
 6. `200` → form replaced by the localized confirmation (AC-017); Umami `subscribe` event recorded
    (AC-034).
 7. `4xx`/`5xx` → localized error rendered, address retained, retry permitted (AC-019).
 
-**Satisfies:** AC-010, AC-016 – AC-024, AC-034
-**Failure branches:** Resend down → `502` → network error message, address not lost. Rate limited →
+**Satisfies:** AC-016, AC-017, AC-018, AC-019, AC-021, AC-022, AC-023, AC-034, AC-070
+**Failure branches:** a dropped connection or blocked request → the network error, input retained,
+retry permitted (AC-019). Rate limited →
 its own distinct message, so a real user who double-clicks understands what happened rather than
 seeing a generic failure.
 
@@ -505,12 +504,9 @@ runtime.
 
 | Case | Consequence if unhandled | Handling | AC |
 | --- | --- | --- | --- |
-| Bot fills every field | Junk addresses, Resend quota burned | Honeypot field; silent `200` | AC-022 |
+| Bot fills every field | Junk submissions | Honeypot field; silent `200`, identical to success | AC-022 |
 | Script hammers the endpoint | Quota exhaustion | Per-IP limit, 5/60s → `429` | AC-023 |
 | nginx does not forward the client IP | Every visitor shares one bucket; the limit becomes global | `X-Forwarded-For` required in the server block; documented in `deploy/` | AC-023 |
-| Resend is down or slow | Request hangs, user sees a dead button | 8s timeout → `502` → error state, address retained | AC-019, AC-020 |
-| Address already on the list | Duplicate error leaks membership | Treated as success, identical confirmation | AC-024 |
-| Env vars missing on the VPS | Silent drop of every address, or a crash loop | Route returns `502` and logs; the site keeps serving | AC-041 |
 | Container restarts | Rate-limit window resets | Accepted — the honeypot still applies, and the blast radius is one 60s window | §3 Decisions |
 | User has reduced-motion enabled | Vestibular discomfort; content invisible if the reveal never fires | Final state rendered directly, no observer | AC-015 |
 | JS disabled or failed to load | Form is inert with no explanation | All content is server-rendered; the form is a real `<form>` and submit is progressively enhanced | AC-008 |
@@ -522,6 +518,7 @@ runtime.
 | Footer links to pages not yet built | Visitor clicks and stays where they are | Links resolve to an existing route, or the entry is not rendered | AC-067 |
 | Sequence left running off-screen | A WebGL loop and a rAF loop burn battery behind three screens of text | `IntersectionObserver` gates both | — |
 | Umami is down | Blocking script delays first paint | Script is `async` and `defer`; a failed load renders nothing and blocks nothing | AC-033 |
+| Visitor expects the launch email the copy describes | A promise the site cannot keep | The notice above the submit control states the form is inert, before they act | AC-070 |
 | Visitor reads fictional testimonials as real | Misleading claims on a public URL | Footer disclaimer, in both locales | AC-035 |
 
 ## 9. Security & Permissions
@@ -539,26 +536,20 @@ call is made.
 
 - **What is collected:** an email address and the locale it was submitted in. Nothing else — no
   name, no stored IP, no cookie.
-- **Where it goes:** Resend, acting as processor. This project stores nothing itself.
+- **Where it goes:** nowhere. The address is read from the request body, validated, and discarded
+  when the handler returns. No processor, no transfer, no storage, and nothing to erase (0003).
 - **The API key:** server-only, never `NEXT_PUBLIC_`, never in a response body, passed to the
-  container at runtime rather than baked into the image (AC-025, AC-038).
+  container at runtime rather than baked into the image (AC-038).
 - **IP addresses:** held in the application process for at most 60 seconds for rate limiting.
   nginx additionally writes client IPs to its access log by default — that is personal data, so
   either IP logging is disabled in the server block or the log is rotated on a stated retention
   period of no more than 30 days (AC-056). An earlier draft of this spec claimed IPs were never
   logged. That was wrong.
-- **Consent:** an unticked checkbox, separate from every other control, gates submission (AC-044),
-  followed by a double opt-in confirmation link (AC-046). This is required rather than cautious:
-  Communications Law 5742-1982 § 30A demands prior explicit consent in writing and provides
-  statutory damages of up to ILS 1,000 per message without proof of damage. The consent text
-  version, timestamp and locale are recorded on the contact (AC-045) — under § 30A the record is
-  the defence.
-- **Transfers:** Resend is US-based, so this is an EU-to-US transfer. It rests on Resend's Data
-  Processing Agreement and the transfer mechanism named in it, which must be signed before a single
-  real address is collected.
+- **Consent:** an unticked, separable checkbox gates submission (AC-044), and its wording carries a
+  version in the content module. Double opt-in and the recorded consent version went with the
+  pipeline in 0003 — they are the first things to rebuild if a real address is ever collected.
+- **Transfers:** none. Nothing leaves the container.
 - **Deletion:** the privacy page names a contact address for removal requests, handled manually in
-  the Resend dashboard. At this volume an automated unsubscribe endpoint is not warranted; Resend's
-  own unsubscribe link covers sent mail.
 - **Cookies:** none, and no client-side storage of any kind (AC-059). Umami is cookieless, so
   ePrivacy Art. 5(3) is not engaged and no consent banner exists (AC-033). Umami's processing of IP
   and user agent still rests on legitimate interest under GDPR Art. 6(1)(f) and is disclosed on the
@@ -589,17 +580,18 @@ call is made.
 - [x] Desktop and mobile captures under `shots/` — closes AC-043
 
 
-**M2 — The form actually works**
-*Demo: subscribe on the live site; the address appears in Resend.*
-- [ ] `POST /api/subscribe`: validation, honeypot, `X-Forwarded-For` rate limit, 8s timeout — closes AC-020, AC-021, AC-022, AC-023, AC-024
-- [ ] Client submit flow: pending, success, error, retry — closes AC-016, AC-017, AC-018, AC-019
-- [ ] Runtime env wiring, server-only, absent-key behavior — closes AC-025, AC-041
-- [ ] Errors and submission results associated with their input and announced via a live region — closes AC-051
-- [ ] Double opt-in: confirmation email with a single-use link; not subscribed until followed — closes AC-046
-- [ ] Record consent version, UTC timestamp and locale on the Resend contact — closes AC-045
-- [ ] Log scrubbing: no address, key or request body reaches any log — closes AC-057
-- [x] Privacy page at `/privacy` — closes AC-027 · *the Art. 48 disclosure set and the 30-day statement are drafted; five values still blank, see HANDOFF.md* — AC-048, AC-060 remain open
-- [ ] Umami script and the `subscribe` event — closes AC-033, AC-034
+**M2 — The form actually works** ✅ *complete*
+*Demo: submit on the live site; pending, error, retry and success are all real.*
+- [x] `POST /api/subscribe`: typed contract, address validation, honeypot — closes AC-021, AC-022
+- [x] Per-IP rate limit, 5/60s, keyed on the first `X-Forwarded-For` entry — closes AC-023
+- [x] Logging boundary: a code and nothing else reaches any log — closes AC-057
+- [x] Client submit flow: pending, disabled control, error with input retained, retry — closes AC-016, AC-019
+- [x] Umami, rendered only when configured, cookieless — closes AC-033
+- [x] `subscribe` event, on success only — closes AC-034
+- [x] The waitlist states it is a demonstration and stores nothing, above the submit control — closes AC-070
+- [x] Privacy page and accessibility statement, in Hebrew — closes AC-027, AC-049
+- ~~Resend call, already-subscribed handling, consent recording, double opt-in~~ — removed by 0003
+
 
 **M3 — ~~Hebrew and RTL~~** — *dissolved by 0001*
 It existed to add a second language to an English page. There is no English page: Hebrew is the
@@ -627,7 +619,7 @@ point a real address at this without flinching.*
 - [ ] nginx access-log IP handling and rotation policy — closes AC-056
 - [ ] Verify no cookie and no client-side storage in either locale — closes AC-059
 - [ ] Marketing email template: sender identity, advertisement marking, one-click opt-out — closes AC-047
-- [ ] `docs/ROPA.md` and `docs/BREACH-RUNBOOK.md`; sign the Resend DPA and enable MFA on the account — closes AC-058
+- [ ] `docs/ROPA.md` and `docs/BREACH-RUNBOOK.md` — closes AC-058 · *0003 removed the processor, so there is no DPA to sign and the record would describe a system that processes nothing*
 
 ## 11. Assumptions
 
@@ -640,7 +632,7 @@ point a real address at this without flinching.*
    licence is unconfirmed — see `CREDITS.md`. *(Amended by 0001.)*
 3. ~~**Consent is the act of submitting.**~~ *Rejected 2026-08-21 by the ACSM audit, §13.*
    Communications Law § 30A requires prior explicit consent in writing, separable and recorded.
-   Superseded by AC-044, AC-045 and AC-046.
+   Superseded by AC-044. AC-045 and AC-046 were themselves retired by 0003 with the pipeline.
 4. **Hebrew copy is machine-drafted and needs your review** before M1 deploys — M3 is dissolved and Hebrew is now the only copy on the site. You are a native
    speaker; I am not. The file carries a marker comment until you have read it.
 5. **Everything on the page is disclosed as fictional** — brand, statistics, testimonials, people —
@@ -656,16 +648,15 @@ point a real address at this without flinching.*
    projects. Standing it up is outside this repo.
 10. **Deployment is manual** — `docker build`, `docker run`, reload nginx. A GitHub Action is a later
     change proposal, not v1 scope.
-11. **You are the data controller** for every address collected here; Resend is the processor. If
-    this were ever operated by a company instead, §9 and the privacy page need that entity.
+11. ~~**You are the data controller** for every address collected here; Resend is the processor.~~
+    *Superseded by 0003* — no address is collected, so there is no controller and no processor. If
+    the form is ever wired to a sender, this assumption returns with the pipeline.
 12. **The site is served at `meridian.<your-domain>`**, supplied at deploy time. No code depends on
     the hostname; it appears only in `deploy/nginx.conf.example` and the canonical URL meta tag, both
     of which are one-line edits.
 
 ## 12. Open Questions
 
-- **A Resend account and API key** — blocks: M2 · needed by: start of M2. Free tier is sufficient.
-  M1 ships without it.
 - **Is Umami already running on the VPS?** — blocks: M2's analytics tasks only · needed by: end of
   M2. If not, standing it up is a separate piece of work and AC-033/AC-034 slip to M4.
 - **Hebrew copy review** — blocks: **M1 deploy** · needed by: before the site is public. Every
@@ -675,7 +666,8 @@ point a real address at this without flinching.*
   period, and the licence of the third-party animation. Recorded in `HANDOFF.md`. They bind only
   once real addresses are collected, which no code does today.
 
-The Resend and Umami questions block M2 only. **The Hebrew review blocks M1's deploy.**
+The Umami question blocks nothing that is built — the script renders only when configured.
+**The Hebrew review blocks deploy**, and it now covers two legal documents as well as the page.
 
 ## 13. Compliance Basis
 
@@ -713,7 +705,7 @@ were last verified 2026-08-15, six days before this audit.
 | Behavior | marketing consent |
 | Module 4 | Communications Law 5742-1982 § 30A — prior explicit consent in writing, recorded; up to ILS 1,000 per message without proof of damage |
 | Module 3 | GDPR Arts. 4(11), 7 — freely given, specific, informed, unambiguous affirmative act |
-| Applied | unticked separable checkbox, recorded consent version, double opt-in. Satisfies both. § 30A is the harder obligation because the record is the defence and the penalty is per-message. |
+| Applied | unticked separable checkbox (AC-044), kept after 0003 as the honest UI for a form that asks to contact you. The recorded consent version and double opt-in went with the pipeline; § 30A no longer binds because nothing is sent, and they are the first things to rebuild if that changes. |
 | Cost | measurably lower signup conversion. Real, and expected. |
 
 No cookie-consent conflict arises: analytics is cookieless, so ePrivacy Art. 5(3) is not engaged.
@@ -725,7 +717,8 @@ That holds only while it stays cookieless.
   business days) — no subscription, payment or continuing transaction exists.
 - Israeli database registration — narrowed by Amendment 13, in force 14 August 2025, to
   data-trading databases, public bodies, and sensitive data at very large scale.
-- Data Security Regs. 5777-2017 access-logging duties — this project holds no database; Resend does.
+- Data Security Regs. 5777-2017 access-logging duties — this project holds no database, and after
+  0003 no processor holds one either.
   What lands here is account access control, not query logging.
 - EU Accessibility Act (Directive 2019/882) — covers e-commerce, banking, e-books, transport and
   terminals; a marketing page is not clearly in scope. WCAG 2.2 AA is built to regardless, because
@@ -737,7 +730,8 @@ That holds only while it stays cookieless.
 1. **Israeli registration threshold** — Amendment 13 is the most heavily amended instrument in the
    matrix and secondary sources still report the pre-2025 rule. The conclusion above is reasoning,
    not verification. Confirm with the Privacy Protection Authority or Israeli counsel.
-2. **Resend DPA and transfer mechanism** — must be signed before a single real address is
-   collected. Blocks M2, and the privacy page cannot name a transfer mechanism that does not exist.
+2. ~~**Resend DPA and transfer mechanism**~~ — *removed by 0003.* There is no processor and no
+   transfer. If a sender is ever added, this returns as a precondition rather than a follow-up.
+
 3. **Hebrew legal copy** — the privacy, consent and accessibility text must be effective in Hebrew
    against an Israeli reader. Machine-drafted Hebrew needs your review before it ships.

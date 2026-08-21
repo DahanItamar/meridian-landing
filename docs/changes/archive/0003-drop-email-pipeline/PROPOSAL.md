@@ -1,6 +1,6 @@
 # 0003 — Drop the email pipeline
 
-> Status: proposed · 2026-08-21 · Against spec version 2.0
+> Status: **merged** into spec v3.0 · 2026-08-21 · Was against spec version 2.0
 
 ## Motivation
 
