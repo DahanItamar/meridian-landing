@@ -5,6 +5,17 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { Float } from "@react-three/drei";
 import type { Group } from "three";
 import { BagAsset } from "./BagAsset";
+
+/**
+ * Flip to true once a .glb is sitting at public/models/coffee-bag.glb.
+ *
+ * The model is being produced in Meshy rather than in this repo, and there is no
+ * file there right now. useGLTF suspends forever on a missing asset, so the
+ * boundary would never resolve and the whole sequence would render nothing —
+ * this keeps the scroll choreography, lighting and copy working in the meantime.
+ * See art/README.md for what the loader expects.
+ */
+const MODEL_PRESENT = false;
 import { damp, scrollState, track } from "@/lib/scroll-store";
 
 /**
@@ -154,9 +165,7 @@ export function BagModel({ reducedMotion }: { reducedMotion: boolean }) {
   });
 
   const body = (
-    <group ref={inner}>
-      <BagAsset />
-    </group>
+    <group ref={inner}>{MODEL_PRESENT ? <BagAsset /> : null}</group>
   );
 
   return (
