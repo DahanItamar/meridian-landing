@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { Float } from "@react-three/drei";
 import type { Group } from "three";
-import { BagMesh } from "./BagMesh";
+import { BagAsset } from "./BagAsset";
 import { damp, scrollState, track } from "@/lib/scroll-store";
 
 /**
@@ -33,8 +33,8 @@ const KEYS = {
     [1.0, Math.PI * 3 + 0.4],
   ],
   positionX: [
-    [0.0, -1.62],
-    [0.14, -1.62],
+    [0.0, -1.78],
+    [0.14, -1.78],
     [0.3, 0],
     [0.46, 0.12],
     [0.56, 0],
@@ -155,7 +155,7 @@ export function BagModel({ reducedMotion }: { reducedMotion: boolean }) {
 
   const body = (
     <group ref={inner}>
-      <BagMesh />
+      <BagAsset />
     </group>
   );
 
