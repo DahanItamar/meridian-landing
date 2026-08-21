@@ -40,9 +40,21 @@ server {
     # /etc/nginx/conf.d/cloudflare.conf defines $from_cloudflare; both it and
     # the snippet are regenerated weekly by refresh-cloudflare-ips.sh. A stale
     # list 403s real people, which is the safe direction to fail.
+    #
+    # The gate is applied PER LOCATION, not at server level. A server-level
+    # `if` runs in the rewrite phase for every request, which would also refuse
+    # the ACME challenge below — and that breaks both the first certificate and
+    # every renewal after it, sixty days later, quietly.
     include snippets/cloudflare-realip.conf;
-    if ($from_cloudflare = 0) {
-        return 403;
+
+    # Ungated on purpose. The challenge is public by design: certbot writes a
+    # token here and Let's Encrypt fetches it over plain HTTP. It reveals
+    # nothing, and it must work whether or not the record is proxied — which is
+    # what lets the certificate be issued BEFORE the orange cloud goes on, and
+    # renewed if it ever comes off.
+    location ^~ /.well-known/acme-challenge/ {
+        root /var/www/html;
+        default_type "text/plain";
     }
 
     # ── Headers ──────────────────────────────────────────────────────────────
@@ -70,6 +82,12 @@ server {
     #
     # 3100, not 3000 — gitcheckup already holds 3000 on this host.
     location / {
+        # Cloudflare only — see the note above. This is what makes
+        # CF-Connecting-IP trustworthy.
+        if ($from_cloudflare = 0) {
+            return 403;
+        }
+
         proxy_pass http://127.0.0.1:3100;
         proxy_http_version 1.1;
         proxy_set_header Host $host;
@@ -87,6 +105,12 @@ server {
 
     # Content-hashed by the build, so the filename changes when the bytes do.
     location /_next/static/ {
+        # Cloudflare only — see the note above. This is what makes
+        # CF-Connecting-IP trustworthy.
+        if ($from_cloudflare = 0) {
+            return 403;
+        }
+
         proxy_pass http://127.0.0.1:3100;
         add_header Cache-Control "public, max-age=31536000, immutable";
     }
@@ -95,6 +119,12 @@ server {
     # max-age with revalidation rather than immutable — replacing the pack
     # without a filename change must not strand a year-old copy in a cache.
     location ~* ^/(art|models)/ {
+        # Cloudflare only — see the note above. This is what makes
+        # CF-Connecting-IP trustworthy.
+        if ($from_cloudflare = 0) {
+            return 403;
+        }
+
         proxy_pass http://127.0.0.1:3100;
         add_header Cache-Control "public, max-age=604800, must-revalidate";
     }
@@ -103,6 +133,12 @@ server {
     # receives an email address, and §9 says the address lives only for the
     # lifetime of the handler.
     location /api/ {
+        # Cloudflare only — see the note above. This is what makes
+        # CF-Connecting-IP trustworthy.
+        if ($from_cloudflare = 0) {
+            return 403;
+        }
+
         proxy_pass http://127.0.0.1:3100;
         proxy_http_version 1.1;
         proxy_set_header Host $host;
