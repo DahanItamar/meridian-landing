@@ -1,22 +1,18 @@
 {
-  "hero-grinder.jpg": {
+  "origin-cherries.jpg": {
     "width": 1024,
-    "height": 683,
-    "bytes": 81774
+    "height": 683
   },
-  "feature-adjust.jpg": {
+  "origin-roast.jpg": {
+    "width": 768,
+    "height": 1024
+  },
+  "origin-beans.jpg": {
     "width": 1024,
-    "height": 683,
-    "bytes": 80057
+    "height": 768
   },
-  "feature-burrs.jpg": {
-    "width": 860,
-    "height": 768,
-    "bytes": 73342
-  },
-  "feature-teardown.jpg": {
+  "meridian-coffee-bag.png": {
     "width": 1024,
-    "height": 768,
-    "bytes": 40533
+    "height": 1365
   }
 }

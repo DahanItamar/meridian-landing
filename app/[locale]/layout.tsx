@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Fraunces, Inter } from "next/font/google";
+import { Archivo, Inter } from "next/font/google";
 import { notFound } from "next/navigation";
 import { AVAILABLE_LOCALES, contentFor, dirFor, isLocale } from "@/lib/locale";
 import "../globals.css";
@@ -15,9 +15,9 @@ import "../globals.css";
  * build needs network access but the running container does not. `display: swap`
  * means text is readable before the font arrives rather than invisible.
  */
-const display = Fraunces({
+const display = Archivo({
   subsets: ["latin"],
-  weight: ["600", "700"],
+  weight: ["700", "800", "900"],
   variable: "--font-display",
   display: "swap",
 });
