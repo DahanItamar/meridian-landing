@@ -1,21 +1,23 @@
 # 01 — Meridian Landing Page — Technical Spec
 
-> Status: Draft · 2026-08-21 · Spec version 1.2
+> Status: Draft · 2026-08-21 · Spec version 2.0
+> Merged: change proposal 0001 — coffee pivot, WebGL hero, Hebrew-only
 > Compliance basis: ACSM modules 1, 3, 4, 6, 8 · markets Israel + EU · see §13
 > Governed by `docs/CONSTITUTION.md` v1.3
 
 ## 1. Problem & Users
 
-A home espresso enthusiast who already owns a decent machine discovers that their cheap grinder is
-why their shots channel and taste sour. They arrive from a YouTube review or an Instagram link, on a
-phone, already half-convinced — and they need to understand within one scroll why a hand grinder
-costs $285 and what it does that theirs doesn't. Today they hit a spec sheet, bounce, and go read a
-forum thread instead.
+Someone who has moved past supermarket coffee finds that the bag on the shelf says almost
+nothing — no roast date, no farm, no process — and that the roasters who do say those things are
+hard to find and harder to trust. They arrive from an Instagram post or a friend's link, on a
+phone, curious rather than convinced, and they need to understand within one scroll what is in
+this bag and why it is different from the one they already have. Today they hit a shop page with
+a product grid and no story, and they close it.
 
-**Primary user:** a home espresso drinker, 25–45, upgrading their grinder, arriving on mobile from a
-review link, comparing two or three options in open tabs.
-**Success looks like:** the visitor reaches the email capture with the value understood, and joins
-the launch list without having to go elsewhere to find out what burr geometry means.
+**Primary user:** a home coffee drinker, 25–45, brewing espresso or filter daily, arriving on
+mobile from a social link, willing to pay more for something they can trace.
+**Success looks like:** the visitor reaches the launch list with the lot understood, and joins it
+without having to go elsewhere to find out what anaerobic processing means.
 
 **Secondary purpose:** this is portfolio project 01. It must also demonstrate — visibly, to a
 prospective client — bilingual RTL layout, a form that genuinely works, motion that respects
@@ -46,8 +48,9 @@ reduced-motion, and a ≥90 Lighthouse score, running on infrastructure you own.
 - **Dark mode** — reserved for project 03, where a corporate palette makes it a real design decision
   rather than a demo feature.
 - **A/B hero variants** — deferred; revisit once 01 is live.
-- **Locales beyond English and Hebrew** — the content type is locale-keyed, so a third is additive,
-  but none is committed.
+- **Any locale but Hebrew** — English was dropped by 0001 along with the `[locale]` segment.
+  Restoring a second language means restoring that segment; the content contract itself is
+  already the shape a second module would satisfy.
 - **Deploying or operating Umami itself** — it is shared infrastructure across all five projects and
   is set up once, outside this repo. This spec only consumes it.
 - **CI/CD** — deployment is a documented manual `docker build` and `docker run` for now. An action
@@ -63,20 +66,20 @@ reduced-motion, and a ≥90 Lighthouse score, running on infrastructure you own.
 
 | ID | Criterion |
 | --- | --- |
-| AC-001 | The site shall render the landing page as a single scrolling route per locale, at `/en` and `/he`. |
-| AC-002 | When a request arrives at `/`, the site shall redirect to `/en`. |
+| AC-001 | The site shall render the landing page as a single scrolling route at `/`. |
+| ~~AC-002~~ | **Retired** by 0001 — the landing page is served at `/` itself, so a redirect from `/` would be a redirect to itself. |
 | AC-003 | The site shall render every user-facing string from a locale content module, and no component shall contain a hard-coded user-facing string. |
 | AC-004 | While the active locale is `he`, the site shall set `dir="rtl"` and `lang="he"` on the `html` element. |
-| AC-005 | While the active locale is `en`, the site shall set `dir="ltr"` and `lang="en"` on the `html` element. |
-| AC-006 | When the user activates the language toggle, the site shall navigate to the equivalent route in the other locale. |
+| ~~AC-005~~ | **Retired** by 0001 — no `en` locale exists. The site serves Hebrew only. |
+| ~~AC-006~~ | **Retired** by 0001 — a language toggle needs two languages. |
 | AC-007 | The site shall express all directional spacing, alignment and positioning with CSS logical properties. |
-| AC-008 | The site shall prerender `/en`, `/he`, `/en/privacy` and `/he/privacy` as static HTML at build time. |
-| AC-009 | The hero shall present the product name, headline, subheadline, one primary CTA, and the product image within the first viewport at 1280×720 and above. |
+| AC-008 | The site shall prerender `/`, `/privacy` and `/accessibility` as static HTML at build time. |
+| AC-009 | The pinned section's first beat shall present the product name, a headline, a subheadline and one primary call to action within the first viewport at 1280×720 and above, without requiring a scroll. |
 | AC-010 | When the primary CTA is activated, the site shall scroll to the email capture section and move keyboard focus to its email input. |
-| AC-011 | The page shall present its sections in this order: hero, social proof, three feature blocks, specification grid, testimonials, FAQ, email capture, footer. |
-| AC-012 | When a FAQ question is activated, the FAQ shall toggle the visibility of its answer. |
-| AC-013 | The FAQ shall be fully operable by keyboard, with each question focusable and toggled by Enter or Space. |
-| AC-014 | When a section first enters the viewport, the site shall play a one-time entrance transition on that section. |
+| AC-011 | The page shall present its sections in this order: fixed navigation, pinned pack sequence, launch countdown, waitlist capture, footer. |
+| ~~AC-012~~ | **Retired** by 0001 — no FAQ. The questions it answered are answered by the pinned beats and the sections below them. |
+| ~~AC-013~~ | **Retired** by 0001 — keyboard operability of a component that no longer exists. |
+| AC-014 | When a section below the pinned sequence first enters the viewport, the site shall play a one-time entrance transition on that section. |
 | AC-015 | While the user agent reports `prefers-reduced-motion: reduce`, the site shall render all sections in their final state and play no entrance transition. |
 | AC-016 | When the user submits the email form with a syntactically valid address, the client shall disable the submit control and render a pending state until the request settles. |
 | AC-017 | When the subscribe request succeeds, the site shall replace the form with a confirmation message in the active locale. |
@@ -90,8 +93,8 @@ reduced-motion, and a ≥90 Lighthouse score, running on infrastructure you own.
 | AC-025 | The site shall never expose the Resend API key in a response body, a client bundle, or a build artifact. |
 | AC-026 | The email capture section shall display a consent notice naming the purpose of collection and linking to the privacy page, in the active locale. |
 | AC-027 | The site shall serve a privacy page stating what is collected, the processor, the retention period, and a contact address for deletion requests. |
-| AC-028 | The site shall render every image through `next/image` with explicit `width` and `height`. |
-| AC-029 | The site shall mark the hero image `priority` and shall lazy-load every other image. |
+| AC-028 | The site shall render every raster image in the DOM through `next/image` with explicit `width` and `height`, and shall draw vector marks as inline SVG. |
+| ~~AC-029~~ | **Retired** by 0001 — no raster image in the DOM at all. Replaced by AC-061, which does the same job for the asset that actually blocks. |
 | AC-030 | Every interactive element shall present a visible focus indicator with at least 3:1 contrast against its adjacent background. |
 | AC-031 | All body text shall meet a contrast ratio of at least 4.5:1 against its background. |
 | AC-032 | Each page shall contain exactly one `h1` and a heading hierarchy with no skipped levels. |
@@ -99,30 +102,39 @@ reduced-motion, and a ≥90 Lighthouse score, running on infrastructure you own.
 | AC-034 | When a subscribe request succeeds, the client shall record a Umami event named `subscribe`. |
 | AC-035 | The footer shall state that the site is a fictional portfolio demonstration and that the brand, testimonials and statistics are invented. |
 | AC-036 | `npm run verify` shall run `next lint && next build` and shall exit non-zero on any lint error or type error. |
-| AC-037 | The site shall score at least 90 for Performance and at least 90 for Accessibility in Lighthouse mobile emulation, for both locales. |
+| AC-037 | The site shall score at least 90 for Performance and at least 90 for Accessibility in Lighthouse mobile emulation. |
 | AC-038 | The Docker image shall build from the repository root with no arguments beyond build-time public env vars, and shall run as a non-root user. |
 | AC-039 | The container shall listen on the port given by `PORT`, defaulting to 3000. |
 | AC-040 | `GET /api/health` shall respond `200` with `{ ok: true }` whenever the process is serving, and shall contact no upstream service. |
 | AC-041 | If `RESEND_API_KEY` or `RESEND_AUDIENCE_ID` is absent at runtime, then the subscribe route shall respond `502 upstream_failed` and the rest of the site shall continue to serve. |
 | AC-042 | The deployment shall serve the site over HTTPS at its subdomain, with nginx forwarding the originating client IP in `X-Forwarded-For`. |
-| AC-043 | The repository shall contain desktop and mobile captures of both locales under `shots/`. |
+| AC-043 | The repository shall contain desktop and mobile captures under `shots/`. |
 | AC-044 | The email capture form shall present an unticked consent checkbox, separate from every other control, and shall refuse submission until it is ticked. |
 | AC-045 | When a subscription succeeds, the subscribe route shall record the consent text version, the submission timestamp in UTC, and the locale, as fields on the Resend contact. |
 | AC-046 | When the form is submitted, the site shall send a confirmation email containing a single-use link, and shall not treat the address as subscribed until that link is followed. |
 | AC-047 | Every marketing message shall name the sender, identify itself as an advertisement in the locale it is sent in, and carry a free one-click opt-out valid for email. |
 | AC-048 | The privacy page shall state the controller identity, each purpose and its lawful basis, the recipients, the third-country transfer mechanism, the retention period, the full list of data-subject rights, the right to withdraw consent, and the right to complain to a supervisory authority. |
-| AC-049 | The site shall serve an accessibility statement at `/[locale]/accessibility`, linked from the footer, naming WCAG 2.2 Level AA, known limitations, and a named contact for accessibility problems. |
+| AC-049 | The site shall serve an accessibility statement at `/accessibility`, linked from the footer, naming WCAG 2.2 Level AA, known limitations, and a named contact for accessibility problems. |
 | AC-050 | Every form input shall have a visible, programmatically associated label. A placeholder shall not serve as a label. |
 | AC-051 | When a form error or a submission result is rendered, the site shall associate it with its input and announce it through a live region. |
 | AC-052 | Every interactive target shall measure at least 24×24 CSS pixels. |
 | AC-053 | While any sticky or overlaying element is displayed, the site shall keep the focused element visible. |
-| AC-054 | The site shall give every informative image descriptive alternative text and every decorative image an empty `alt` attribute. |
+| AC-054 | The site shall give every informative image descriptive alternative text and every decorative image an empty `alt` attribute, and shall present no information in the WebGL canvas that is not also present as DOM text. |
 | AC-055 | The reverse proxy shall serve over TLS 1.3, send HSTS, and set `X-Content-Type-Options`, `Referrer-Policy` and a `Content-Security-Policy`. |
 | AC-056 | The reverse proxy shall omit the client IP address from its access log, or rotate that log on a stated retention period not exceeding 30 days. |
 | AC-057 | The subscribe route shall write no email address, no API key and no request body to any log. |
 | AC-058 | The repository shall contain a record of processing activities and a breach-notification runbook naming the GDPR 72-hour clock and the Israeli Privacy Protection Authority route. |
 | AC-059 | The site shall set no cookie and shall write nothing to `localStorage`, `sessionStorage` or IndexedDB. |
 | AC-060 | The privacy page shall state that erasure and opt-out requests are answered within 30 days, and shall name the address that receives them. |
+| AC-061 | The pinned section shall render a static poster of the pack in its server-rendered markup, and shall mount the WebGL canvas only after first paint. |
+| AC-062 | The pinned section shall reserve its full height before the canvas mounts, and mounting the canvas shall cause no layout shift. |
+| AC-063 | While the user agent reports `prefers-reduced-motion: reduce`, the pinned sequence shall follow scroll position without damping, and shall come to rest in the same frame the scroll stops. |
+| AC-064 | The pinned section shall expose exactly one beat to the accessibility tree and the tab order at a time; a faded beat shall be reachable by neither. |
+| AC-065 | The shipped model shall declare no `KHR_draco_mesh_compression` and no mesh-quantization extension. |
+| AC-066 | The pack's printed artwork and its model shall each be reproducible from checked-in sources by a single documented command. |
+| AC-067 | Every navigation and footer link shall resolve to a section or route that exists. |
+| AC-068 | The launch countdown shall compute its target at render time and shall never display a zero or negative interval. |
+| AC-069 | The launch countdown shall not announce its per-second changes to assistive technology, and shall expose the remaining time as text that does not update every second. |
 
 ## 3. Architecture
 
@@ -147,7 +159,7 @@ components, differing only in which content module they load and which `dir` the
                       ▼
         ┌──────────────────────────────┐
         │  Docker container            │
-        │  next start (standalone)     │   prerendered /en /he /*/privacy
+        │  next start (standalone)     │   prerendered / /privacy /accessibility
         │  ├─ POST /api/subscribe      │   validate · honeypot · rate-limit
         │  └─ GET  /api/health         │
         └──────────────────────────────┘
@@ -166,12 +178,16 @@ components, differing only in which content module they load and which `dir` the
 | --- | --- | --- |
 | nginx | TLS termination, subdomain routing, sets `X-Forwarded-For`. Owns no application logic. | nginx on the VPS, outside this repo |
 | Container | Runs one Next.js process. Stateless apart from the rate-limit window. | Docker, `node:20-alpine`, non-root |
-| Page shell | Sets `lang`/`dir`, loads the locale content module, composes sections. No layout of its own. | Next.js 15 App Router, `[locale]` segment |
+| Page shell | Sets `lang`/`dir`, loads the content module, composes sections. No layout of its own. | Next.js 15 App Router, single root route |
 | Section components | Render one section each from props. Never fetch, never read the locale directly. | React 19 server components, except where motion or state forces `"use client"` |
 | Content modules | Every user-facing string and all product data, one module per locale, both satisfying one type. | TypeScript, no runtime dependency |
 | Subscribe route | Validates, screens the honeypot, rate-limits, forwards to Resend. Stores nothing durable. | Next.js Route Handler, Node runtime |
 | Health route | Reports that the process is serving, for Docker and nginx. | Next.js Route Handler |
-| Motion primitives | A reveal wrapper and a stagger container, both reduced-motion aware. | `motion` (formerly `framer-motion`) |
+| Motion primitives | A reveal wrapper, reduced-motion aware. Used by the sections below the pinned sequence only. | `framer-motion` |
+| Pinned sequence | Measures scroll over its own container and publishes progress. Owns no geometry and no copy. | Client component, `getBoundingClientRect` in rAF |
+| Pack stage | The studio: five local lights, a contact blob, and one `useFrame` owning camera, rotation and key light together. | `@react-three/fiber`, code-split, client-only |
+| Panel projection | Splits the mesh into front / back / foil groups and fits the flat artwork onto the printed faces. | Pure TypeScript over `three` buffer geometry |
+| Choreography | The keyframe table. Every camera move, zoom, rotation and light position on the page is one row in it. | Pure TypeScript, no React |
 | Analytics | Pageviews and the `subscribe` event. | Umami, self-hosted, shared across projects |
 
 ### Decisions
@@ -193,14 +209,14 @@ Instead of: one Next.js app with five route groups — fewer containers to run, 
 `npm install` shared by five sites that are supposed to prove five different stacks of decisions.
 Revisit if: VPS memory becomes a real constraint; five idle Node processes are roughly 400MB.
 
-**Hand-rolled i18n via a `[locale]` segment** — two content modules satisfying one `Content` type,
-resolved by `generateStaticParams`.
-Because: with exactly two locales and no translator workflow, a library adds a dependency, a
-runtime, and a message-extraction step to solve a problem that is one typed object. Constitution
-principle 6 requires a named problem before a dependency, and there isn't one.
-Instead of: `next-intl` — correct once there are translators, plural rules, or date and number
-localisation to manage. None of those exist here.
-Revisit if: a third locale lands, or copy starts being edited by someone who won't open a `.ts` file.
+**One Hebrew route, no locale layer** — a single content module, served at `/`.
+Because: with one language, a locale segment buys a `/he` prefix on every URL, a redirect from
+`/`, a `params` promise threaded through every page, and a lookup that can only return one
+answer. Unused generality survives precisely because removing it feels like losing something.
+Instead of: a `[locale]` segment with two content modules satisfying one `Content` type — the
+original choice (0001 reversed it), and correct while the site was bilingual. That reasoning
+still holds if a second language is ever committed to; restoring the segment is the work.
+Revisit if: a second locale is actually funded, rather than anticipated.
 
 **Resend, called from our own route** — the key never leaves the server.
 Because: the address is the conversion, and it should not depend on a third-party iframe or a
@@ -232,6 +248,31 @@ Instead of: marking whole sections client components — simpler to write, and i
 in the section to the browser twice.
 Revisit if: a section needs interactive state beyond an entrance transition.
 
+**Hand-rolled scroll measurement, not a scroll library** — progress is measured from
+`getBoundingClientRect` every frame, never accumulated.
+Because: an accumulated delta drifts the moment anything else on the page changes height, and
+this sequence is three screens long.
+Instead of: a scroll-linked animation library — correct when there are many independent scroll
+effects; there is exactly one here, and it drives WebGL rather than CSS.
+Revisit if: a second scroll-driven surface appears on the page.
+
+**Plain glTF only — no Draco, no mesh quantization.**
+Because: both produced a model that loaded without a single error and then never rendered. drei
+suspends on `useGLTF` and the boundary never resolves — no exception, no console message, just a
+lit scene with no product in it. The failure is invisible in CI and obvious only to a human
+looking at the page.
+Instead of: Draco, which would take the shipped model from 81 KB to roughly 40 KB — a saving
+worth less than a class of bug the verify command cannot catch.
+Revisit if: the loader stack changes and the boundary behaviour can be demonstrated to resolve.
+
+**The model's own texture is discarded and the artwork is projected onto it.**
+Because: the supplied image-to-3D exports carry hallucinated label text — "MERII SPECIA",
+"JASNINE BLUERE", invented body copy across a fragmented atlas — and beats 2 and 3 push the
+camera close enough to read it. Geometry from the generator, printing from us.
+Instead of: regenerating until the label is right — image-to-3D does not produce legible type at
+any seed, and the panels have to be editable as copy in any case.
+Revisit if: a generator ships that can hold a typeface.
+
 ## 4. Project Layout & Conventions
 
 Governed by `docs/CONSTITUTION.md` v1.3 — layout, dependency direction, naming, size limits,
@@ -242,7 +283,7 @@ Specific to this spec:
 - `content/` holds one module per locale — `en.ts`, `he.ts` — plus `types.ts` defining the `Content`
   interface both must satisfy. Adding a field to the type without adding it to both locales is a
   type error, which is the point.
-- `app/[locale]/` is the only route group. `locale` is typed as `'en' | 'he'`, never `string`.
+- `app/` holds the three routes directly. There is no locale segment and no `params` to thread.
 - `components/motion/` holds the reduced-motion-aware primitives. It is the only directory permitted
   to import `motion`.
 - `deploy/` holds `nginx.conf.example` and the documented `docker build` / `docker run` invocation.
@@ -252,53 +293,74 @@ Specific to this spec:
 
 ## 5. Data Models
 
-No database. Two types matter: the content contract that both locales satisfy, and the subscribe
-payload.
+No database. Two types matter: the content contract, and the subscribe payload.
 
 ```ts
 // content/types.ts
 
-export type Locale = 'en' | 'he';
+/**
+ * One module satisfies this — `he.ts`. The interface exists so a missing string
+ * is a build failure rather than an `undefined` rendered to a visitor.
+ *
+ * The `Locale` union and the locale lookup that used to sit here went with the
+ * routing machinery in 0001: there is one language, and a type with one member
+ * describes a decision nobody is making.
+ */
+
+export interface Row { label: string; value: string }
+
+/** One per entry in SCROLLY_STEPS. A beat carries at most one of rows / ctas / buy. */
+export interface Beat {
+  kicker: string;
+  title: string;
+  body?: string;
+  rows?: Row[];
+  ctas?: { primary: string };
+  buy?: { label: string; note: string };
+}
+
+export interface Countdown {
+  heading: string;
+  units: { days: string; hours: string; minutes: string; seconds: string };
+  a11y: string;             // read by assistive tech in place of per-second digits (AC-069)
+}
+
+/** A legal page. The notice states the demo posture where a page can be read alone (AC-035). */
+export interface LegalDoc {
+  title: string;
+  updated: string;
+  intro: string;
+  sections: { heading: string; body: string[]; rows?: Row[] }[];
+}
 
 export interface Content {
-  meta:         { title: string; description: string };
-  hero:         { eyebrow: string; headline: string; sub: string; cta: string; imageAlt: string };
-  proof:        { statLabel: string; statValue: string }[];   // exactly 3; fictional (AC-035)
-  features:     Feature[];                                    // exactly 3
-  specs:        { label: string; value: string }[];
-  testimonials: Testimonial[];                                // fictional (AC-035)
-  faq:          { question: string; answer: string }[];
-  capture: {
+  meta:      { title: string; description: string };
+  brand:     { name: string; tagline: string };
+  nav:       { roast: string };
+  scrolly:   { beats: Beat[]; stageLabel: string; hint: string };   // exactly 3 beats
+  countdown: Countdown;
+  legal:     { demoNotice: string; backToSite: string; privacy: LegalDoc; accessibility: LegalDoc };
+  waitlist: {
     heading: string;
     sub: string;
-    label: string;          // visible, associated label. NOT the placeholder (AC-050)
-    placeholder: string;
+    nameLabel: string;      // visible, associated label. NOT the placeholder (AC-050)
+    namePlaceholder: string;
+    emailLabel: string;
+    emailPlaceholder: string;
     submit: string;
-    consent: string;        // checkbox text; names the purpose, links privacy (AC-026, AC-044)
+    consent: string;        // the checkbox's own label — the act, not a notice (AC-044)
     consentVersion: string; // bumped on any wording change; recorded per contact (AC-045)
-    confirmSent: string;    // double opt-in acknowledgement (AC-046)
-    success: string;
-    errorInvalid: string;
-    errorNetwork: string;
-    errorRate: string;
+    noticeBefore: string;   // purpose of collection, split so the link text is a string
+    noticeLink: string;     // links the privacy page (AC-026)
+    noticeAfter: string;
+    errors: { name: string; email: string; consent: string };
+    success: { heading: string; body: string };
   };
-  footer:  { disclaimer: string; privacyLabel: string; a11yLabel: string; rights: string };
-  privacy: { heading: string; body: string[] };
-  a11y:    { heading: string; body: string[]; contact: string };   // reg. 35 (AC-049)
-}
-
-export interface Feature {
-  title: string;
-  body: string;
-  image: string;            // path under /public; same asset across locales
-  imageAlt: string;
-}
-
-export interface Testimonial {
-  quote: string;
-  name: string;
-  role: string;
-  avatar: string | null;    // null = render initials; not every fictional person needs a face
+  footer: {
+    links: { label: string; href: string }[];
+    copyright: string;
+    disclosure: string;     // AC-035
+  };
 }
 ```
 
@@ -309,7 +371,10 @@ export interface SubscribeRequest {
   email: string;
   consent: true;            // literal true. An unticked box cannot form a valid request (AC-044)
   website: string;          // honeypot. Always empty from a real user (AC-022)
-  locale: Locale;           // recorded on the Resend contact for future sends
+  locale: "he";             // recorded on the Resend contact for future sends (AC-045).
+                            // A literal, not `Locale` — that type went with the
+                            // routing machinery in 0001. The field stays because
+                            // AC-045 names it; only its type collapsed.
 }
 
 export type SubscribeError =
@@ -354,9 +419,10 @@ Contract details, not commentary:
 
 | Route | Renders | Generation |
 | --- | --- | --- |
-| `/` | redirect → `/en` | static redirect (AC-002) |
-| `/[locale]` | the landing page | `generateStaticParams` → `en`, `he` (AC-008) |
-| `/[locale]/privacy` | the privacy page | static (AC-027) |
+| `/` | the landing page | static (AC-001, AC-008) |
+| `/privacy` | the privacy page | static (AC-027) |
+| `/accessibility` | the accessibility statement | static (AC-049) |
+| `/api/health` | `{ ok: true }` | dynamic, contacts nothing (AC-040) |
 
 ### Environment
 
@@ -390,17 +456,23 @@ silently becomes a global limit.
 
 ### Flow A — First visit and scroll
 
-1. Visitor opens `https://meridian.<domain>` on a phone → nginx terminates TLS, proxies to the
-   container → redirect to `/en`.
-2. Container returns prerendered HTML; the LCP element is the hero image, marked `priority`.
-3. Visitor scrolls → each section's `Reveal` wrapper observes its own intersection and plays a
-   one-time entrance transition.
-4. If the OS reports reduced motion, every section is already in its final state and step 3 is a
-   no-op.
+1. Visitor opens `https://meridian.<domain>` on a phone → nginx terminates TLS and proxies to the
+   container.
+2. Container returns prerendered HTML. The LCP element is the first beat's headline, which is
+   server-rendered text; the pinned section shows its poster frame at its reserved height
+   (AC-061, AC-062).
+3. After first paint the WebGL chunk loads and the canvas mounts over the poster. Nothing moves.
+4. Visitor scrolls → the pinned section measures its own `getBoundingClientRect` each frame and
+   publishes progress; the stage samples the keyframe table at that progress; beats cross-fade,
+   and only the held beat is in the accessibility tree (AC-064).
+5. Past the sequence, the sections below play their one-time entrance transitions (AC-014).
+6. If the OS reports reduced motion, those sections are already in their final state and the
+   stage follows scroll without damping (AC-015, AC-063).
 
-**Satisfies:** AC-001, AC-002, AC-008, AC-009, AC-011, AC-014, AC-015, AC-029
-**Failure branches:** a blocked image host leaves alt text and layout intact, because every image
-carries explicit dimensions (AC-028) — nothing reflows.
+**Satisfies:** AC-001, AC-008, AC-009, AC-011, AC-014, AC-015, AC-061, AC-062, AC-063, AC-064
+**Failure branches:** no WebGL, or a lost context → the poster frame stays and every word is
+still DOM text (AC-054). A slow chunk delays the pack, never the headline.
+
 
 ### Flow B — Subscribe
 
@@ -420,17 +492,14 @@ carries explicit dimensions (AC-028) — nothing reflows.
 its own distinct message, so a real user who double-clicks understands what happened rather than
 seeing a generic failure.
 
-### Flow C — Language switch
+### ~~Flow C — Language switch~~
 
-1. Visitor on `/en` activates the toggle.
-2. Client navigates to `/he` (AC-006).
-3. The document's `dir` flips to `rtl` and `lang` to `he` (AC-004).
-4. Every layout mirrors, because all directional CSS is logical (AC-007). No component branches on
-   locale to decide a margin.
+**Removed** by 0001. Its first step was "visitor on `/en` activates the toggle", and neither
+`/en` nor the toggle exists. AC-004 and AC-007, which this flow also satisfied, are satisfied by
+Flow A instead — the document is `rtl`/`he` from the first byte rather than after a navigation,
+which is strictly the safer of the two, because no component ever observes a direction change at
+runtime.
 
-**Satisfies:** AC-004, AC-005, AC-006, AC-007
-**Failure branches:** none at runtime. The failure mode is a hardcoded `margin-left` shipping
-unnoticed, which is why AC-007 is a criterion `spec-drift` can check rather than a style preference.
 
 ## 8. Edge Cases & Failure Modes
 
@@ -446,7 +515,12 @@ unnoticed, which is why AC-007 is a criterion `spec-drift` can check rather than
 | User has reduced-motion enabled | Vestibular discomfort; content invisible if the reveal never fires | Final state rendered directly, no observer | AC-015 |
 | JS disabled or failed to load | Form is inert with no explanation | All content is server-rendered; the form is a real `<form>` and submit is progressively enhanced | AC-008 |
 | Hebrew text in a component with physical CSS | Layout breaks only in `he`, so it ships unnoticed | Logical properties everywhere, enforced as a criterion | AC-007 |
-| Hero image slow on 3G | Layout shift, poor LCP | Explicit dimensions, `priority`, modern format | AC-028, AC-029, AC-037 |
+| WebGL bundle and model slow on 3G | Blank first viewport where the headline should be | Poster frame in server-rendered markup; canvas mounts after first paint; section reserves its height | AC-061, AC-062 |
+| Four beats stacked in one sticky container | A screen reader announces every headline at once; a keyboard user tabs into invisible CTAs | Faded beats carry `aria-hidden` and `inert` | AC-064 |
+| WebGL unavailable or context lost | Blank first viewport, no headline, no CTA | Poster frame stays; the copy is DOM and never depended on the canvas | AC-061, AC-054 |
+| Model shipped with a compression extension | Loads without error and never renders; nothing in `verify` catches it | Build step writes plain glTF and the extension list is asserted | AC-065 |
+| Footer links to pages not yet built | Visitor clicks and stays where they are | Links resolve to an existing route, or the entry is not rendered | AC-067 |
+| Sequence left running off-screen | A WebGL loop and a rAF loop burn battery behind three screens of text | `IntersectionObserver` gates both | — |
 | Umami is down | Blocking script delays first paint | Script is `async` and `defer`; a failed load renders nothing and blocks nothing | AC-033 |
 | Visitor reads fictional testimonials as real | Misleading claims on a public URL | Footer disclaimer, in both locales | AC-035 |
 
@@ -495,21 +569,25 @@ call is made.
 
 ## 10. Build Order
 
-**M1 — The English page, live on a real URL**
-*Demo: a link you can send someone. Full page, real content, real images, running on your VPS.*
-- [ ] Scaffold Next.js 15, TypeScript strict, Tailwind, with `verify` wired — closes AC-036
-- [ ] `content/types.ts` and `content/en.ts` with all copy and product data — closes AC-003
-- [ ] `app/[locale]/` shell setting `lang`/`dir`, `generateStaticParams` for `en` — closes AC-001, AC-005, AC-008
-- [ ] Root redirect `/` → `/en` — closes AC-002
-- [ ] Hero, social proof, three feature blocks — closes AC-009, AC-011
-- [ ] Spec grid, testimonials, FAQ accordion with keyboard support — closes AC-012, AC-013
-- [ ] Email capture markup: visible associated label, unticked separable consent checkbox gating submission, consent notice linking the privacy page — closes AC-026, AC-044, AC-050
-- [ ] Footer with the fictional-demo disclaimer — closes AC-035
-- [ ] All imagery through `next/image`, hero `priority` — closes AC-028, AC-029
-- [ ] Logical properties from the first component onward — closes AC-007
-- [ ] `GET /api/health` — closes AC-040
-- [ ] Dockerfile on `output: 'standalone'`, non-root, `PORT` respected — closes AC-038, AC-039
-- [ ] `deploy/nginx.conf.example` with `X-Forwarded-For`, and deploy to the subdomain — closes AC-042
+**M1 — The page, live on a real URL** ✅ *complete*
+*Demo: a link you can send someone. Full page, real content, running on your VPS.*
+- [x] Scaffold, content contract, single Hebrew route, `verify` wired — closes AC-001, AC-003, AC-004, AC-036
+- [x] Pinned pack sequence: three beats, choreography table, one `useFrame` — closes AC-009, AC-011
+- [x] Poster frame in server markup, canvas mounted after first paint — closes AC-061, AC-062
+- [x] Beat accessibility: one `h1`, faded beats `inert` — closes AC-032, AC-064
+- [x] Reduced motion on the sequence — closes AC-063
+- [x] Launch countdown that cannot expire — closes AC-068, AC-069
+- [x] Entrance reveals on the sections below the sequence — closes AC-014
+- [x] Model and artwork pipeline, plain glTF asserted — closes AC-065, AC-066
+- [x] Waitlist markup: labels, unticked separable consent, notice linking privacy — closes AC-026, AC-044, AC-050, AC-051
+- [x] Privacy page and accessibility statement, in Hebrew — closes AC-008, AC-027, AC-049
+- [x] Every link resolves; targets at least 24×24; focus clears the fixed header — closes AC-052, AC-053, AC-067
+- [x] Logical properties throughout — closes AC-007
+- [x] `GET /api/health` — closes AC-040
+- [x] Dockerfile on `standalone`, non-root, `PORT` honoured — closes AC-038, AC-039
+- [x] `deploy/nginx.conf.example` with TLS 1.3, HSTS, CSP, `X-Forwarded-For`, log policy — closes AC-042, AC-055, AC-056
+- [x] Desktop and mobile captures under `shots/` — closes AC-043
+
 
 **M2 — The form actually works**
 *Demo: subscribe on the live site; the address appears in Resend.*
@@ -520,15 +598,14 @@ call is made.
 - [ ] Double opt-in: confirmation email with a single-use link; not subscribed until followed — closes AC-046
 - [ ] Record consent version, UTC timestamp and locale on the Resend contact — closes AC-045
 - [ ] Log scrubbing: no address, key or request body reaches any log — closes AC-057
-- [ ] Privacy page at `/[locale]/privacy`, carrying the full Art. 13 and PPL disclosure set and the 30-day response statement — closes AC-027, AC-048, AC-060
+- [x] Privacy page at `/privacy` — closes AC-027 · *the Art. 48 disclosure set and the 30-day statement are drafted; five values still blank, see HANDOFF.md* — AC-048, AC-060 remain open
 - [ ] Umami script and the `subscribe` event — closes AC-033, AC-034
 
-**M3 — Hebrew and RTL**
-*Demo: flip the toggle on the live site and watch the entire layout mirror.*
-- [ ] `content/he.ts` satisfying `Content` — closes AC-003
-- [ ] `he` added to `generateStaticParams`, `dir="rtl"` wiring — closes AC-004, AC-008
-- [ ] Language toggle component — closes AC-006
-- [ ] RTL sweep: every section audited in `he` — closes AC-007
+**M3 — ~~Hebrew and RTL~~** — *dissolved by 0001*
+It existed to add a second language to an English page. There is no English page: Hebrew is the
+only locale and the sections are written in it from the first line rather than translated into it
+afterwards. The language toggle went with AC-006.
+
 
 **M4 — Motion, accessibility, and the numbers**
 *Demo: the Lighthouse report, and the page with reduced-motion toggled on and off.*
@@ -537,7 +614,7 @@ call is made.
 - [ ] CTA scroll-and-focus behavior — closes AC-010
 - [ ] Focus indicators and contrast pass on both locales — closes AC-030, AC-031
 - [ ] Heading hierarchy audit — closes AC-032
-- [ ] Accessibility statement at `/[locale]/accessibility`, linked from the footer — closes AC-049
+- [x] Accessibility statement at `/accessibility`, linked from the footer — closes AC-049
 - [ ] Target sizes at least 24×24, focus never obscured by sticky elements — closes AC-052, AC-053
 - [ ] Alt-text pass: informative images described, decorative images empty — closes AC-054
 - [ ] Lighthouse ≥90 / ≥90 on both locales — closes AC-037
@@ -554,20 +631,23 @@ point a real address at this without flinching.*
 
 ## 11. Assumptions
 
-1. **The brand is "Meridian" and the product is the Meridian M1, a hand grinder at $285 USD.** If
-   wrong, only `content/*.ts` and the imagery change — no structural impact.
-2. **Product and lifestyle photography comes from Unsplash under its license**, credited in
-   `CREDITS.md`, with no real brand logos visible in any shot. If a licensing constraint makes this
-   unworkable, M1's image tasks need a different source.
+1. **The brand is "Meridian" and the product is a 1 kg bag of whole-bean specialty coffee,
+   unpriced and pre-launch.** Nothing on the page is for sale; the only conversion is the launch
+   list. *(Amended by 0001 — was a $285 hand grinder.)*
+2. **There is no photography.** Every asset is original: the pack artwork is rendered from HTML
+   sources in `art/`, the roundel is inline SVG, and the model's geometry comes from a supplied
+   image-to-3D export whose own texture is discarded. One third-party animation is used and its
+   licence is unconfirmed — see `CREDITS.md`. *(Amended by 0001.)*
 3. ~~**Consent is the act of submitting.**~~ *Rejected 2026-08-21 by the ACSM audit, §13.*
    Communications Law § 30A requires prior explicit consent in writing, separable and recorded.
    Superseded by AC-044, AC-045 and AC-046.
-4. **Hebrew copy is machine-drafted and needs your review** before M3 ships. You are a native
+4. **Hebrew copy is machine-drafted and needs your review** before M1 deploys — M3 is dissolved and Hebrew is now the only copy on the site. You are a native
    speaker; I am not. The file carries a marker comment until you have read it.
 5. **Everything on the page is disclosed as fictional** — brand, statistics, testimonials, people —
    via the footer, in both locales. This is deliberate: invented testimonials presented as real
    would be a genuine problem on a public URL, and the disclaimer costs nothing.
-6. **Prices display in USD only**, in both locales. Currency localisation is not in scope.
+6. ~~**Prices display in USD only.**~~ *Superseded by 0001* — no price is displayed. Currency
+   handling is out of scope until something is sold.
 7. **This spec lives at `01-landing-b2c/SPEC.md`, not `docs/SPEC.md`** — each project is its own repo
    and needs its own spec. Later chain stages must be pointed at this path.
 8. **The container runs as a single replica.** The rate limiter's guarantee depends on it (§3
@@ -588,10 +668,14 @@ point a real address at this without flinching.*
   M1 ships without it.
 - **Is Umami already running on the VPS?** — blocks: M2's analytics tasks only · needed by: end of
   M2. If not, standing it up is a separate piece of work and AC-033/AC-034 slip to M4.
-- **Hebrew copy review** — blocks: M3 deploy · needed by: end of M3. Drafting proceeds without it;
-  only the deploy waits.
+- **Hebrew copy review** — blocks: **M1 deploy** · needed by: before the site is public. Every
+  string on the site is Hebrew, including two legal documents, and none has been read by a native
+  speaker. Building proceeded without it; only the deploy waits.
+- **Five values for the legal pages** — contact email, phone, registered address, retention
+  period, and the licence of the third-party animation. Recorded in `HANDOFF.md`. They bind only
+  once real addresses are collected, which no code does today.
 
-None of these block M1.
+The Resend and Umami questions block M2 only. **The Hebrew review blocks M1's deploy.**
 
 ## 13. Compliance Basis
 
