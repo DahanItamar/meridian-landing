@@ -19,6 +19,7 @@ import {
   type Texture,
 } from "three";
 import { ART, BACK, FOIL, FRONT, collectTriangles, projectPanels } from "@/lib/pack-projection";
+import { A11Y_EVENT, motionStopped } from "@/lib/a11y-prefs";
 import { sample } from "@/lib/scrolly-config";
 import { scrollState } from "@/lib/scroll-store";
 
@@ -307,12 +308,22 @@ function Studio({ reducedMotion, onReady }: { reducedMotion: boolean; onReady?: 
 export function PackStage({ onReady }: { onReady?: () => void }) {
   const [reducedMotion, setReducedMotion] = useState(false);
 
+  // Two sources, either of which stops the camera: the OS setting, and the
+  // accessibility menu's own switch. A visitor whose OS preference is off but
+  // who asked this page to hold still means it — and CSS alone cannot reach
+  // the render loop, which is the one piece of motion on this page that no
+  // stylesheet can stop.
   useEffect(() => {
     const query = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReducedMotion(query.matches);
-    const onChange = (e: MediaQueryListEvent) => setReducedMotion(e.matches);
-    query.addEventListener("change", onChange);
-    return () => query.removeEventListener("change", onChange);
+    const sync = () => setReducedMotion(motionStopped());
+
+    sync();
+    query.addEventListener("change", sync);
+    window.addEventListener(A11Y_EVENT, sync);
+    return () => {
+      query.removeEventListener("change", sync);
+      window.removeEventListener(A11Y_EVENT, sync);
+    };
   }, []);
 
   return (

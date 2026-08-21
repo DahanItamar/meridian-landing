@@ -27,6 +27,27 @@ export const he: Content = {
 
   nav: { roast: "ההשקה" },
 
+  a11y: {
+    open: "תפריט נגישות",
+    title: "נגישות",
+    close: "סגירת התפריט",
+    textSize: "גודל טקסט",
+    smaller: "הקטנת טקסט",
+    larger: "הגדלת טקסט",
+    contrast: "ניגודיות גבוהה",
+    links: "הדגשת קישורים",
+    readable: "גופן קריא",
+    stopMotion: "עצירת אנימציות",
+    bigCursor: "סמן גדול",
+    reset: "איפוס הגדרות הנגישות",
+    statement: "להצהרת הנגישות המלאה",
+    // Deliberate: a menu is convention in Israel, not the obligation. The
+    // obligation is that the site itself be accessible and that the statement
+    // exist. Saying so here is more useful to a visitor than implying the menu
+    // is the compliance.
+    note: "התפריט הזה לא מחליף את נגישות האתר עצמו. אם משהו כאן חוסם אתכם, ספרו לנו ונתקן.",
+  },
+
   scrolly: {
     stageLabel: "אריזת Meridian, נפתחת מכל צדדיה",
     hint: "גללו",
@@ -141,8 +162,6 @@ export const he: Content = {
     accessibility: {
       title: "הצהרת נגישות",
       updated: "עודכן לאחרונה: 21 באוגוסט 2026",
-      intro:
-        "איתמר דהאן מבקש שאתר מרידיאן יהיה שמיש לכל אחד ואחת, כולל מי שמשתמש בקורא מסך, בניווט מקלדת, בהגדלה, בהקלדה קולית או בטכנולוגיה מסייעת אחרת.",
       sections: [
         {
           heading: "התקן שאנחנו עובדים לפיו",

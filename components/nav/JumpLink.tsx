@@ -20,14 +20,28 @@ import type { MouseEvent, ReactNode } from "react";
  *    back to the top of the page — the classic skip-link bug. The target takes
  *    focus with `preventScroll`, because the smooth scroll is already running
  *    and a second jump would fight it.
+ *
+ * `focus` narrows that second behaviour to one element inside the target. The
+ * waitlist CTA uses it because AC-010 asks for the email input specifically,
+ * not the section: a visitor who pressed "save me a place" has already decided,
+ * and landing them on the section still costs them a Tab to reach the field
+ * they came for.
  */
 export function JumpLink({
   href,
+  focus,
   className,
   children,
 }: {
   /** An in-page fragment, e.g. `#roast`. */
   href: string;
+  /**
+   * Optional CSS selector, resolved *inside* the target, for the element that
+   * should take focus instead of the target itself. Falls back to the target
+   * when it matches nothing, so a renamed input degrades to the old behaviour
+   * rather than to no focus move at all.
+   */
+  focus?: string;
   className?: string;
   children: ReactNode;
 }) {
@@ -43,6 +57,12 @@ export function JumpLink({
 
     e.preventDefault();
     target.scrollIntoView({ behavior: "smooth", block: "start" });
+
+    const inner = focus ? target.querySelector<HTMLElement>(focus) : null;
+    if (inner) {
+      inner.focus({ preventScroll: true });
+      return;
+    }
 
     // A section is not focusable by default; -1 makes it programmatically
     // focusable without adding it to the tab order.

@@ -44,7 +44,8 @@ export interface Beat {
 export interface LegalDoc {
   title: string;
   updated: string;
-  intro: string;
+  /** Optional. The accessibility statement opens on its first heading instead. */
+  intro?: string;
   sections: { heading: string; body: string[]; rows?: Row[] }[];
 }
 
@@ -63,6 +64,28 @@ export interface Content {
 
   /** One entry. The launch section and the form are one destination. */
   nav: { roast: string };
+
+  /**
+   * The accessibility menu. Every string is visible to a screen reader — the
+   * toggles are real checkboxes with real labels, not icons with title
+   * attributes, so these are the accessible names too.
+   */
+  a11y: {
+    open: string;
+    title: string;
+    close: string;
+    textSize: string;
+    smaller: string;
+    larger: string;
+    contrast: string;
+    links: string;
+    readable: string;
+    stopMotion: string;
+    bigCursor: string;
+    reset: string;
+    statement: string;
+    note: string;
+  };
 
   /** Exactly 3 beats, matching SCROLLY_STEPS. */
   scrolly: {

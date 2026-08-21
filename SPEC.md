@@ -1,7 +1,8 @@
 # 01 — Meridian Landing Page — Technical Spec
 
-> Status: Draft · 2026-08-21 · Spec version 3.0
-> Merged: 0001 — coffee pivot, WebGL hero, Hebrew-only · 0003 — drop the email pipeline
+> Status: Draft · 2026-08-21 · Spec version 3.1
+> Merged: 0001 — coffee pivot, WebGL hero, Hebrew-only · 0003 — drop the email pipeline ·
+> 0004 — retire the marketing-message criterion · 0005 — accessibility menu
 > Compliance basis: ACSM modules 1, 3, 4, 6, 8 · markets Israel + EU · see §13
 > Governed by `docs/CONSTITUTION.md` v1.3
 
@@ -112,19 +113,19 @@ reduced-motion, and a ≥90 Lighthouse score, running on infrastructure you own.
 | AC-044 | The email capture form shall present an unticked consent checkbox, separate from every other control, and shall refuse submission until it is ticked. |
 | ~~AC-045~~ | **Retired** by 0003 — no contact to record anything on. The consent version stays in the content module; it identifies the wording, which is not the same as a field on a vendor's record. |
 | ~~AC-046~~ | **Retired** by 0003 — double opt-in confirms an address for a sender that no longer exists. **The first thing to rebuild if the brand stops being fictional.** |
-| AC-047 | Every marketing message shall name the sender, identify itself as an advertisement in the locale it is sent in, and carry a free one-click opt-out valid for email. |
+| ~~AC-047~~ | **Retired** by 0004 — the obligation attaches to sending an advertisement, and nothing is sent. Communications Law 5742-1982 § 30A binds a sender; with the pipeline gone there is no message to name a sender on, mark, or offer an opt-out from. **Revives in full the moment anything is sent**, with AC-045 and AC-046. |
 | ~~AC-048~~ | **Retired** by 0003 — Art. 13 disclosure describes processing. There is none: no recipient, no transfer, no retention, because nothing is kept. |
 | AC-049 | The site shall serve an accessibility statement at `/accessibility`, linked from the footer, naming WCAG 2.2 Level AA, known limitations, and a named contact for accessibility problems. |
 | AC-050 | Every form input shall have a visible, programmatically associated label. A placeholder shall not serve as a label. |
 | AC-051 | When a form error or a submission result is rendered, the site shall associate it with its input and announce it through a live region. |
-| AC-052 | Every interactive target shall measure at least 24×24 CSS pixels. |
+| AC-052 | Every interactive target shall measure at least 24×24 CSS pixels, except a target inline within a sentence, which WCAG 2.2 SC 2.5.8 exempts. *(Exception added by 0005.)* |
 | AC-053 | While any sticky or overlaying element is displayed, the site shall keep the focused element visible. |
 | AC-054 | The site shall give every informative image descriptive alternative text and every decorative image an empty `alt` attribute, and shall present no information in the WebGL canvas that is not also present as DOM text. |
 | AC-055 | The reverse proxy shall serve over TLS 1.3, send HSTS, and set `X-Content-Type-Options`, `Referrer-Policy` and a `Content-Security-Policy`. |
 | AC-056 | The reverse proxy shall omit the client IP address from its access log, or rotate that log on a stated retention period not exceeding 30 days. |
 | AC-057 | The subscribe route shall write no email address, no API key and no request body to any log. |
 | AC-058 | The repository shall contain a record of processing activities and a breach-notification runbook naming the GDPR 72-hour clock and the Israeli Privacy Protection Authority route. |
-| AC-059 | The site shall set no cookie and shall write nothing to `localStorage`, `sessionStorage` or IndexedDB. |
+| AC-059 | The site shall set no cookie, and shall write nothing to `localStorage`, `sessionStorage` or IndexedDB other than the accessibility preferences the visitor sets from the accessibility menu, under a single key containing no identifier. *(Exception added by 0005; ePrivacy Art. 5(3) strictly-necessary.)* |
 | ~~AC-060~~ | **Retired** by 0003 — a response commitment for erasure of data that is never stored. |
 | AC-061 | The pinned section shall render a static poster of the pack in its server-rendered markup, and shall mount the WebGL canvas only after first paint. |
 | AC-062 | The pinned section shall reserve its full height before the canvas mounts, and mounting the canvas shall cause no layout shift. |
@@ -136,6 +137,12 @@ reduced-motion, and a ≥90 Lighthouse score, running on infrastructure you own.
 | AC-068 | The launch countdown shall compute its target at render time and shall never display a zero or negative interval. |
 | AC-069 | The launch countdown shall not announce its per-second changes to assistive technology, and shall expose the remaining time as text that does not update every second. |
 | AC-070 | The waitlist section shall state that the site is a demonstration and that the address is neither stored nor transmitted, before the submit control. |
+| AC-071 | The application shall declare no outbound message dependency — no SMTP client and no transactional-mail SDK — and no code path shall send mail, so that the precondition AC-047 was retired on is verifiable rather than assumed. |
+| AC-072 | The site shall present, on every page, an accessibility menu offering text size, high contrast, link highlighting, a readable font, stopped motion and an enlarged cursor. |
+| AC-073 | The accessibility menu shall be fully operable by keyboard: opened from a button with an accessible name, closed by `Escape` with focus returned to that button, and absent from the tab order while closed. |
+| AC-074 | While motion is stopped from the accessibility menu, the site shall halt the WebGL camera as well as CSS animation and smooth scrolling. |
+| AC-075 | The accessibility menu shall retain its settings across navigation within the site. |
+| AC-076 | The accessibility menu shall link to the accessibility statement and shall state that it does not replace the accessibility of the site itself. |
 
 ## 3. Architecture
 
@@ -184,6 +191,7 @@ components, differing only in which content module they load and which `dir` the
 | Content modules | Every user-facing string and all product data, one module per locale, both satisfying one type. | TypeScript, no runtime dependency |
 | Subscribe route | Validates, screens the honeypot, rate-limits, answers. Forwards nowhere and stores nothing. | Next.js Route Handler, Node runtime |
 | Health route | Reports that the process is serving, for Docker and nginx. | Next.js Route Handler |
+| Accessibility menu | Holds and applies visitor display preferences. Renders no content and reads no page state. | React client component + CSS attribute selectors |
 | Motion primitives | A reveal wrapper, reduced-motion aware. Used by the sections below the pinned sequence only. | `framer-motion` |
 | Pinned sequence | Measures scroll over its own container and publishes progress. Owns no geometry and no copy. | Client component, `getBoundingClientRect` in rAF |
 | Pack stage | The studio: five local lights, a contact blob, and one `useFrame` owning camera, rotation and key light together. | `@react-three/fiber`, code-split, client-only |
@@ -550,7 +558,12 @@ call is made.
   pipeline in 0003 — they are the first things to rebuild if a real address is ever collected.
 - **Transfers:** none. Nothing leaves the container.
 - **Deletion:** the privacy page names a contact address for removal requests, handled manually in
-- **Cookies:** none, and no client-side storage of any kind (AC-059). Umami is cookieless, so
+- **Client-side storage:** one key, `meridian.a11y`, holding the display preferences set from
+  the accessibility menu (AC-059 as amended by 0005). It is read only by the page that wrote it,
+  is never sent anywhere, and contains no identifier — the parse spreads over defaults, so a
+  corrupt or stale value degrades to the default rather than throwing. ePrivacy Art. 5(3)
+  exempts it as strictly necessary for a service the visitor explicitly requested.
+- **Cookies:** none, and no other client-side storage of any kind (AC-059). Umami is cookieless, so
   ePrivacy Art. 5(3) is not engaged and no consent banner exists (AC-033). Umami's processing of IP
   and user agent still rests on legitimate interest under GDPR Art. 6(1)(f) and is disclosed on the
   privacy page. Replacing Umami with anything cookie-based reintroduces the opt-in gate.
@@ -601,14 +614,15 @@ afterwards. The language toggle went with AC-006.
 
 **M4 — Motion, accessibility, and the numbers**
 *Demo: the Lighthouse report, and the page with reduced-motion toggled on and off.*
-- [ ] `components/motion/Reveal` and stagger container, reduced-motion aware — closes AC-014, AC-015
-- [ ] Apply reveals across sections — closes AC-014
-- [ ] CTA scroll-and-focus behavior — closes AC-010
+- [x] `components/motion/Reveal` and stagger container, reduced-motion aware — closes AC-014, AC-015
+- [x] Apply reveals across sections — closes AC-014
+- [x] CTA scroll-and-focus behavior — closes AC-010
 - [ ] Focus indicators and contrast pass on both locales — closes AC-030, AC-031
-- [ ] Heading hierarchy audit — closes AC-032
+- [x] Heading hierarchy audit — closes AC-032
 - [x] Accessibility statement at `/accessibility`, linked from the footer — closes AC-049
-- [ ] Target sizes at least 24×24, focus never obscured by sticky elements — closes AC-052, AC-053
-- [ ] Alt-text pass: informative images described, decorative images empty — closes AC-054
+- [x] Accessibility menu: preferences, keyboard operation, motion stop, persistence — closes AC-072, AC-073, AC-074, AC-075, AC-076
+- [x] Target sizes at least 24×24, focus never obscured by sticky elements — closes AC-052, AC-053
+- [x] Alt-text pass: informative images described, decorative images empty — closes AC-054
 - [ ] Lighthouse ≥90 / ≥90 on both locales — closes AC-037
 - [ ] Desktop and mobile captures of both locales into `shots/` — closes AC-043
 
@@ -618,7 +632,7 @@ point a real address at this without flinching.*
 - [ ] nginx TLS 1.3, HSTS, `X-Content-Type-Options`, `Referrer-Policy`, CSP — closes AC-055
 - [ ] nginx access-log IP handling and rotation policy — closes AC-056
 - [ ] Verify no cookie and no client-side storage in either locale — closes AC-059
-- [ ] Marketing email template: sender identity, advertisement marking, one-click opt-out — closes AC-047
+- [x] Assert no outbound message dependency: no mail client in the dependency tree, no send path in the code — closes AC-071
 - [ ] `docs/ROPA.md` and `docs/BREACH-RUNBOOK.md` — closes AC-058 · *0003 removed the processor, so there is no DPA to sign and the record would describe a system that processes nothing*
 
 ## 11. Assumptions

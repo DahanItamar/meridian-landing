@@ -296,7 +296,11 @@ export function PackScrolly({ content }: { content: Content }) {
 
                 {beat.ctas ? (
                   <div className="mt-8 flex flex-wrap gap-3">
-                    <JumpLink href="#waitlist" className="btn btn-solid h-13 px-7 text-[15.5px]">
+                    <JumpLink
+                      href="#waitlist"
+                      focus="input[type=email]"
+                      className="btn btn-solid h-13 px-7 text-[15.5px]"
+                    >
                       {beat.ctas.primary}
                     </JumpLink>
                   </div>
@@ -304,12 +308,16 @@ export function PackScrolly({ content }: { content: Content }) {
 
                 {beat.buy ? (
                   <>
-                    <a href="#waitlist" className="btn btn-gold mt-[30px] h-13 px-[26px] text-base">
+                    <JumpLink
+                      href="#waitlist"
+                      focus="input[type=email]"
+                      className="btn btn-gold mt-[30px] h-13 px-[26px] text-base"
+                    >
                       <span>{beat.buy.label}</span>
                       <span aria-hidden="true" className="text-[15px] leading-none rtl:rotate-180">
                         →
                       </span>
-                    </a>
+                    </JumpLink>
                     <p className="text-subtle mt-4 text-[13px] font-light">{beat.buy.note}</p>
                   </>
                 ) : null}

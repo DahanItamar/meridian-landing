@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Heebo, JetBrains_Mono } from "next/font/google";
 import Script from "next/script";
+import { AccessibilityMenu } from "@/components/a11y/AccessibilityMenu";
 import { he } from "@/content/he";
 import "./globals.css";
 
@@ -86,6 +87,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="he" dir="rtl" className={`${heebo.variable} ${mono.variable}`}>
       <body>
         {children}
+        {/* In the layout, not the page: the menu has to reach /privacy and
+            /accessibility too, and a visitor who raised the text size does not
+            expect it to drop back when they follow a footer link. */}
+        <AccessibilityMenu content={he} />
         <Analytics />
       </body>
     </html>

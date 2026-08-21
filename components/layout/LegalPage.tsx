@@ -44,7 +44,9 @@ export function LegalPage({ content, doc }: { content: Content; doc: LegalDoc })
         {legal.demoNotice}
       </p>
 
-      <p className="text-muted mt-9 text-[16px] leading-[1.85] font-light">{doc.intro}</p>
+      {doc.intro ? (
+        <p className="text-muted mt-9 text-[16px] leading-[1.85] font-light">{doc.intro}</p>
+      ) : null}
 
       {doc.sections.map((section) => (
         <section key={section.heading} className="mt-11">
