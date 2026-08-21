@@ -642,8 +642,9 @@ point a real address at this without flinching.*
    list. *(Amended by 0001 — was a $285 hand grinder.)*
 2. **There is no photography.** Every asset is original: the pack artwork is rendered from HTML
    sources in `art/`, the roundel is inline SVG, and the model's geometry comes from a supplied
-   image-to-3D export whose own texture is discarded. One third-party animation is used and its
-   licence is unconfirmed — see `CREDITS.md`. *(Amended by 0001.)*
+   image-to-3D export whose own texture is discarded. The one third-party animation that was used
+   has been replaced by original work, because its licence could not be confirmed — see
+   `CREDITS.md`. *(Amended by 0001; the animation resolved 2026-08-21.)*
 3. ~~**Consent is the act of submitting.**~~ *Rejected 2026-08-21 by the ACSM audit, §13.*
    Communications Law § 30A requires prior explicit consent in writing, separable and recorded.
    Superseded by AC-044. AC-045 and AC-046 were themselves retired by 0003 with the pipeline.

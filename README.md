@@ -164,8 +164,8 @@ the roast dates and the countdown are illustrative, and the footer says so. Noth
 address is collected.
 
 Not done, and tracked rather than hidden: the Hebrew has not been read by a native speaker, the
-legal pages have not been reviewed by anyone qualified, and two asset licences are unconfirmed. See
-`CREDITS.md` and `deploy/README.md`.
+legal pages have not been reviewed by anyone qualified, and Tripo's terms for the mesh are
+unconfirmed. See `CREDITS.md` and `deploy/README.md`.
 
 ## Layout
 

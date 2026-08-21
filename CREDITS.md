@@ -27,24 +27,21 @@ design language (matte black pouch, centred cream label band, gold roundel above
 it, weight below, warm foil accents) with our own marks, so there is nothing to
 strip or licence.
 
-## Third-party animation
+## Animation
 
-`components/brand/BeansLoader.tsx` is **not original work.** It was exported from
-LottieFiles as an animated SVG and supplied for this build, then recoloured from
-its original browns (`#503932`, `#603813`, `#7f4d35`, `#d4c186`) to this
-project's gold ramp. Nothing else about it was changed — the geometry and the
-`animateTransform` timings are the author's.
+`components/brand/BeansLoader.tsx` — three beans hopping while the 3D pack
+loads — is **original work, drawn for this project**. Three ellipses with a
+crease each, animated with CSS keyframes.
 
-> **The licence is unconfirmed and must be settled before this ships.**
-> LottieFiles assets carry different terms depending on the author: some are the
-> Lottie Simple Licence, some are CC BY and require attribution by name, and some
-> are paid. The source page is
-> `app.lottiefiles.com/share/e4c70b4a-7c47-4f77-9ce4-3d0d62c567b9`, which is
-> behind an account this build could not read — so neither the author nor the
-> licence could be recorded here automatically. Fill both in, or replace the
-> asset.
+It replaced a LottieFiles export that was supplied for this build and recoloured
+to the project's gold ramp. That asset's licence could not be confirmed:
+LottieFiles terms vary by author between the Lottie Simple Licence, CC BY with
+attribution, and paid, and the source page was behind an account this build
+could not read. Rather than ship an unconfirmed licence, it was replaced.
+Nothing of it survives — different bean count, geometry, timing, and animation
+technology.
 
-Two other animations from the same source were requested and are **not** used:
+Two further animations from the same source were requested and are **not** used:
 the success mark and the consent checkbox tick are original SVG in this
 repository, drawn to match the site's palette and driven by state rather than by
 a timeline.

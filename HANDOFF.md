@@ -101,7 +101,6 @@ pages because they bind only once real addresses are collected:
 | Phone number | accessibility statement; reg. 35 expects a phone route, not only email |
 | Registered address | privacy policy, controller identity |
 | Retention period | privacy policy §3 |
-| Author + licence of `BeansLoader.tsx` | CREDITS.md — LottieFiles asset, terms unconfirmed |
 
 Filled already: Itamar Dahan (controller and accessibility coordinator),
 Meridian (service name), 21 August 2026 (effective date).

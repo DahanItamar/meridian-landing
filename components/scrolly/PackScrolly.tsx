@@ -11,6 +11,7 @@ import {
   washX,
 } from "@/lib/scrolly-config";
 import { BeansLoader } from "@/components/brand/BeansLoader";
+import { StageBoundary } from "@/components/three/StageBoundary";
 import { JumpLink } from "@/components/nav/JumpLink";
 import { scrollState } from "@/lib/scroll-store";
 
@@ -46,7 +47,13 @@ export function PackScrolly({ content }: { content: Content }) {
    * can wait a long time, and the pack should not.
    */
   const [mounted, setMounted] = useState(false);
-  const [packReady, setPackReady] = useState(false);
+
+  /**
+   * Three states, not two booleans. "failed" is not "loading forever" — the
+   * loader has to stop and the poster has to stay — and it is not "ready"
+   * either, because nothing arrived to cross-fade to.
+   */
+  const [stage, setStage] = useState<"loading" | "ready" | "failed">("loading");
 
   useEffect(() => {
     const start = () => setMounted(true);
@@ -58,7 +65,8 @@ export function PackScrolly({ content }: { content: Content }) {
     return () => clearTimeout(id);
   }, []);
 
-  const onPackReady = useCallback(() => setPackReady(true), []);
+  const onPackReady = useCallback(() => setStage("ready"), []);
+  const onPackFail = useCallback(() => setStage("failed"), []);
 
   useEffect(() => {
     const el = section.current;
@@ -206,17 +214,23 @@ export function PackScrolly({ content }: { content: Content }) {
             className="absolute inset-0 h-full w-full object-contain"
             style={{
               transition: "opacity 450ms ease-out",
-              opacity: packReady ? 0 : 1,
+              // Stays opaque unless something replaced it. On failure the
+              // poster IS the product shot, and the visitor is none the wiser.
+              opacity: stage === "ready" ? 0 : 1,
             }}
           />
         </picture>
 
-        {mounted ? <PackStage onReady={onPackReady} /> : null}
+        {mounted ? (
+          <StageBoundary onFail={onPackFail}>
+            <PackStage onReady={onPackReady} />
+          </StageBoundary>
+        ) : null}
 
         {/* Shown only while the pack is still arriving. The poster says what
             the product is; this says it is not finished loading. Both leave
             together. */}
-        {!packReady ? (
+        {stage === "loading" ? (
           <div
             aria-hidden="true"
             className="pointer-events-none absolute inset-x-0 bottom-[18%] flex justify-center"

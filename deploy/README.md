@@ -110,5 +110,6 @@ site is up and looks finished:
   demonstration accurately, which is not the same as having been reviewed.
 - **The Hebrew copy has not been read by a native speaker.** It is now the only
   copy on the site.
-- **The animation in `components/brand/BeansLoader.tsx` has an unconfirmed
-  licence.** See CREDITS.md.
+- **Confirm Tripo's terms permit portfolio use of the mesh.** Only the
+  geometry survives and it was generated for this build, so the risk is low —
+  but it is the last unconfirmed licence on the site. See CREDITS.md.
