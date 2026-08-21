@@ -1,6 +1,9 @@
 #!/usr/bin/env node
 /**
- * Renders the flat pack artwork: art/panel-{front,back}.html -> public/art/*.png.
+ * Renders the flat pack artwork: art/panel-{front,back}.html -> public/art/*.webp.
+ *
+ * Chrome only screenshots to PNG, so the PNG is written first and kept as the
+ * checked-in source; the WebP beside it is what the page actually loads.
  *
  * These are the two textures three/project.js prints onto the pouch geometry.
  * They are authored as HTML rather than drawn in an image editor because their
@@ -20,6 +23,7 @@
  */
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync } from "node:fs";
+import sharp from "sharp";
 import { dirname, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
@@ -66,5 +70,16 @@ for (const { src, out, width, height } of PANELS) {
     { stdio: ["ignore", "ignore", "inherit"] }
   );
 
-  console.log(`${src} -> ${out}  ${width}x${height}`);
+  // LOSSLESS, not quality-92. These are textures, not photographs: the type on
+  // them ("SINGLE ORIGIN", "GUJI / ETHIOPIA") is a few pixels tall here and is
+  // then magnified onto geometry, so ringing around a glyph edge lands on the
+  // label at the size a visitor reads it. Lossless costs nothing to choose —
+  // it beat q92 on the back panel and lost 4 KB to it on the front — and it
+  // still halves the PNG, which is the whole point: these two files were 181 KB
+  // on the wire, more than the poster, and Lighthouse never mentions them
+  // because three.js loads them as textures rather than as <img>.
+  const webp = out.replace(/\.png$/, ".webp");
+  await sharp(target).webp({ lossless: true, effort: 6 }).toFile(resolve(webp));
+
+  console.log(`${src} -> ${webp}  ${width}x${height}`);
 }

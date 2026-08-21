@@ -6,8 +6,8 @@ regenerable — nothing here is a flattened export whose source has been lost.
 
 | Source | Command | Output |
 | --- | --- | --- |
-| `panel-front.html` | `node scripts/panels.mjs` | `public/art/panel-front.png` (680×1360) |
-| `panel-back.html` | `node scripts/panels.mjs` | `public/art/panel-back.png` (684×1360) |
+| `panel-front.html` | `node scripts/panels.mjs` | `public/art/panel-front.webp` (680×1360) |
+| `panel-back.html` | `node scripts/panels.mjs` | `public/art/panel-back.webp` (684×1360) |
 | an image-to-3D export | `node scripts/pack-model.mjs "<raw.glb>"` | `public/models/meridian-pack.glb` (81 KB) |
 
 `bag-source-for-meshy.png` — 1400×1800, the front-elevation render the whole

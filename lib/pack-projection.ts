@@ -43,8 +43,8 @@ export const FOIL = 2;
  * front 0.5000 w/h, back 0.5027.
  */
 export const ART = [
-  { src: "/art/panel-front.png", aspect: 680 / 1360 },
-  { src: "/art/panel-back.png", aspect: 684 / 1360 },
+  { src: "/art/panel-front.webp", aspect: 680 / 1360 },
+  { src: "/art/panel-back.webp", aspect: 684 / 1360 },
 ] as const;
 
 /** How flat a triangle must be to count toward the panel's own extent. */

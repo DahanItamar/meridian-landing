@@ -15,8 +15,8 @@ this repo:
 
 | Asset | Source | Notes |
 | --- | --- | --- |
-| `public/art/panel-front.png` | `art/panel-front.html` | Flat front face of the pack. Drawn in CSS and inline SVG. |
-| `public/art/panel-back.png` | `art/panel-back.html` | Flat back face. Same. |
+| `public/art/panel-front.{png,webp}` | `art/panel-front.html` | Flat front face of the pack. Drawn in CSS and inline SVG. The WebP is what the page loads; the PNG is Chrome's screenshot, kept as the source. |
+| `public/art/panel-back.{png,webp}` | `art/panel-back.html` | Flat back face. Same. |
 | `public/models/meridian-pack.glb` | a Tripo image-to-3D export | Geometry only — see below. |
 | the roundel in the nav and footer | `components/brand/Roundel.tsx` | Inline SVG, `currentColor`. |
 | `art/bag-source-for-meshy.png` | drawn for this project | The reference the panels were laid out against. |
