@@ -16,10 +16,14 @@
  * The output is transparent — the section paints its own radial ground behind
  * both the poster and the canvas, so baking a background in would show as a
  * visible square.
+ *
+ * Each frame is written three times: AVIF, WebP and the PNG that Chrome handed
+ * back. The PNG is the fallback and the source of the other two, so it stays.
  */
 import { spawn } from "node:child_process";
-import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, statSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
+import sharp from "sharp";
 
 const URL_ = process.argv[2] ?? "http://localhost:3000/he";
 const PORT = 9444;
@@ -153,7 +157,28 @@ for (const { out, w, h } of POSTERS) {
 
   const buf = Buffer.from(dataUrl.split(",")[1], "base64");
   writeFileSync(resolve(out), buf);
-  console.log(`  -> ${out}  ${w}×${h}  ${(buf.length / 1024).toFixed(0)} KB`);
+
+  // The poster is the LCP element on both breakpoints — it is what a visitor
+  // looks at for the whole first second, while the GLB is still arriving. As a
+  // PNG it was the largest thing on the wire by an order of magnitude and the
+  // only transfer Lighthouse could fault that was not an artefact of software
+  // rendering.
+  //
+  // Quality is high on purpose: this frame stands in for the WebGL render and
+  // then cross-fades to it, so banding in the pack's shading would read as a
+  // rendering fault rather than as compression. Alpha is preserved — the
+  // section paints its own ground behind it.
+  const avif = out.replace(/\.png$/, ".avif");
+  const webp = out.replace(/\.png$/, ".webp");
+  await sharp(buf).avif({ quality: 62, effort: 6 }).toFile(resolve(avif));
+  await sharp(buf).webp({ quality: 82, effort: 6 }).toFile(resolve(webp));
+
+  const kb = (n) => `${(n / 1024).toFixed(0)} KB`;
+  const size = (f) => kb(statSync(resolve(f)).size);
+  console.log(
+    `  -> ${out.replace(/\.png$/, ".{avif,webp,png}")}  ${w}×${h}  ` +
+      `avif ${size(avif)} · webp ${size(webp)} · png ${kb(buf.length)}`
+  );
 }
 
 ws.close();

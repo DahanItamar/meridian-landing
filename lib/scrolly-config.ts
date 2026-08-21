@@ -118,9 +118,15 @@ export interface Frame {
  * frame, which is what keeps the motion locked to the scrollbar rather than to
  * a clock.
  *
- * `narrow` is for portrait viewports, where the copy stacks over the pack
- * instead of beside it: there is no empty half to move into, so the sideways
- * framing flattens and the camera backs off to keep the pack in frame.
+ * `narrow` means below the 64rem breakpoint, where `.beat` in globals.css
+ * stacks the copy over the pack instead of beside it: there is no empty half to
+ * move into, so the sideways framing flattens and the camera backs off to keep
+ * the pack in frame.
+ *
+ * The caller decides it from `matchMedia("(min-width: 64rem)")` — the same
+ * signal the CSS uses, deliberately. It was the camera's aspect ratio once, and
+ * a 1024x900 window then got the wide copy layout with the narrow framing,
+ * which put the headline on top of the pack.
  */
 export function sample(t: number, narrow = false): Frame {
   const k = Math.max(0, Math.min(1, t));

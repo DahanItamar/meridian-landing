@@ -167,19 +167,42 @@ export function PackScrolly({ content }: { content: Content }) {
           container that already has its height, mounting the canvas over it
           moves nothing.
 
-          Two sources because the choreography frames the pack differently above
-          and below lg; scripts/poster.mjs captures one at each. `alt=""` and
-          aria-hidden: it is the same object the canvas draws, and every word on
-          this section is DOM text beside it (AC-054).
+          Two frames because the choreography frames the pack differently above
+          and below lg; scripts/poster.mjs captures one at each, at that same
+          64rem. `alt=""` and aria-hidden: it is the same object the canvas
+          draws, and every word on this section is DOM text beside it (AC-054).
+
+          Three encodings each, most efficient first — the browser takes the
+          first `type` it understands, so a browser without AVIF falls to WebP
+          and one without either falls to the PNG on the `img`. The saving is
+          not marginal: this frame is 210 KB as a PNG and 9 KB as AVIF, because
+          a soft-lit render on a transparent ground is the worst case for PNG
+          and close to the best case for both of the others.
         */}
         <picture>
+          <source
+            media="(min-width: 64rem)"
+            type="image/avif"
+            srcSet="/art/pack-poster-wide.avif"
+          />
+          <source
+            media="(min-width: 64rem)"
+            type="image/webp"
+            srcSet="/art/pack-poster-wide.webp"
+          />
           <source media="(min-width: 64rem)" srcSet="/art/pack-poster-wide.png" />
+          <source type="image/avif" srcSet="/art/pack-poster-narrow.avif" />
+          <source type="image/webp" srcSet="/art/pack-poster-narrow.webp" />
           <img
             src="/art/pack-poster-narrow.png"
             alt=""
             aria-hidden="true"
-            width={1440}
-            height={900}
+            // The narrow frame's own dimensions, matching the `src` beside them.
+            // They reserve nothing — the element is absolutely positioned and
+            // sized by its parent — but a wrong intrinsic ratio here is the kind
+            // of thing that becomes a real bug the moment the layout changes.
+            width={430}
+            height={932}
             className="absolute inset-0 h-full w-full object-contain"
             style={{
               transition: "opacity 450ms ease-out",
@@ -212,7 +235,6 @@ export function PackScrolly({ content }: { content: Content }) {
             const end = SCROLLY_STEPS[i].align === "end";
             const Heading = i === 0 ? "h1" : "h2";
             const style: CSSProperties = {
-              maxWidth: "min(34rem, max(20rem, 44vw))",
               marginInlineStart: end ? "auto" : 0,
               marginInlineEnd: end ? 0 : "auto",
               opacity: t,
@@ -232,7 +254,7 @@ export function PackScrolly({ content }: { content: Content }) {
                 // a screen reader reads all four at once.
                 aria-hidden={t < 0.6}
                 inert={t < 0.6 ? true : undefined}
-                className="beat absolute start-4 end-4 top-[13%] sm:start-8 sm:end-8 lg:start-14 lg:end-14 lg:top-1/2"
+                className="beat absolute start-0 end-0 top-[13%] lg:start-14 lg:end-14 lg:top-1/2"
                 style={style}
               >
                 <p className="text-gold font-mono text-[11px] tracking-[0.32em] uppercase">

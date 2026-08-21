@@ -105,12 +105,18 @@ export function RoastCountdown({ content }: { content: Content }) {
           // array, so the cells stay in logical order in the source and the
           // direction is one attribute to flip if that ever changes back.
           dir="ltr"
-          className="mt-11 flex flex-wrap items-start justify-center gap-3 sm:gap-4"
+          // Four columns that divide the width, not four boxes that wrap. As a
+          // flex row with a min-width the cells needed 372px on a 358px phone
+          // and broke 3 + 1, which orphaned the seconds on their own centred
+          // line and read as a layout fault. A clock is one row or it is not a
+          // clock. The max-width stops the cells sprawling on a wide screen now
+          // that nothing else bounds them.
+          className="mx-auto mt-11 grid max-w-[480px] grid-cols-4 items-start gap-2 sm:gap-4"
         >
           {cells.map((cell) => (
             <div
               key={cell.label}
-              className="border-card-line bg-surface-raised rounded-card min-w-[84px] border px-4 py-5 sm:min-w-[104px] sm:px-6"
+              className="border-card-line bg-surface-raised rounded-card border px-2 py-5 sm:px-6"
             >
               <span className="text-ink block font-mono text-[clamp(1.9rem,4.4vw,2.9rem)] leading-none font-medium tabular-nums">
                 {cell.value ?? "––"}

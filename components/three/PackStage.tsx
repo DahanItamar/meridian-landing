@@ -175,6 +175,25 @@ function Studio({ reducedMotion, onReady }: { reducedMotion: boolean; onReady?: 
   const shown = useRef<number | null>(null);
 
   /**
+   * True below Tailwind's `lg`, which is where `.beat` in globals.css stops
+   * putting the copy beside the pack and starts stacking it above with a scrim.
+   * 64rem is written once in each place and means the same thing in both.
+   *
+   * A ref rather than state: it is read inside useFrame, and a re-render per
+   * resize would rebuild the canvas subtree for a value the loop can just look
+   * at.
+   */
+  const narrow = useRef(false);
+
+  useEffect(() => {
+    const query = window.matchMedia("(min-width: 64rem)");
+    const sync = () => (narrow.current = !query.matches);
+    sync();
+    query.addEventListener("change", sync);
+    return () => query.removeEventListener("change", sync);
+  }, []);
+
+  /**
    * Camera, rotation and key light are driven from one useFrame, deliberately.
    * A second hook moving the camera beside this one stopped the pack rendering
    * altogether while every other object kept drawing — one owner per frame.
@@ -200,8 +219,15 @@ function Studio({ reducedMotion, onReady }: { reducedMotion: boolean; onReady?: 
     // scene is built around a perspective one — the dolly in beats 2 and 3 is
     // the whole point, and an orthographic camera has no dolly to do.
     const cam = camera as PerspectiveCamera;
-    const narrow = cam.isPerspectiveCamera && cam.aspect < 1.15;
-    const s = sample(shown.current, narrow);
+
+    // The SAME breakpoint the copy layout uses, not the camera's aspect ratio.
+    //
+    // This was `cam.aspect < 1.15`, and the two disagreed in a band: any
+    // viewport at least 64rem wide but squarer than 1.15 — a 1024x900 window, a
+    // 1280x1200 display — got the wide two-column copy with the narrow centred
+    // camera, which put the headline directly on top of the pack. Driving both
+    // from one signal makes that class of bug unreachable rather than fixed.
+    const s = sample(shown.current, narrow.current);
 
     cam.position.set(s.cam[0], s.cam[1], s.cam[2]);
     look.set(s.target[0], s.target[1], s.target[2]);

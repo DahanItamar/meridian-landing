@@ -134,19 +134,48 @@ h3 {
  */
 .beat {
   transform: translateY(var(--beat-y));
-  padding: 1.25rem 1rem 3rem;
-  border-radius: var(--radius-card);
+  /* Below lg the copy sits over the pack rather than beside it, so it needs a
+     scrim to stay legible against the texture — and the scrim has to reach both
+     edges of the viewport to read as a scrim.
+
+     It did not, twice over: a max-width capped it near 44vw and the element was
+     inset 1–2rem, which left a rounded rectangle with hard vertical edges
+     floating over the render — a panel nobody designed, and the first thing the
+     eye finds. So the element spans edge to edge and the inset it used to get
+     from `start-4`/`start-8` comes from padding instead, which moves the words
+     without moving the gradient. */
+  max-width: none;
+  padding: 1.25rem 1rem 5rem;
+  /* Measured from the BOTTOM, in the same unit as the bottom padding, so the
+     fade happens entirely in that padding and never under a word. Sized in
+     percentages it fell where the content decided: the longest beat put its
+     last line at 88% of the box, which is deep into the fade, and on a phone
+     that line landed across the roundel on the pack with almost no scrim left
+     to hold it. Percentages made legibility a function of copy length. */
   background: linear-gradient(
-    180deg,
-    rgba(8, 8, 10, 0.93) 0%,
-    rgba(8, 8, 10, 0.86) 58%,
-    rgba(8, 8, 10, 0) 100%
+    to top,
+    rgba(8, 8, 10, 0) 0,
+    rgba(8, 8, 10, 0.88) 5rem,
+    rgba(8, 8, 10, 0.93) 100%
   );
+}
+
+/* Matches `sm`. The wider the viewport, the further in the text sits — but the
+   gradient behind it still reaches the edges. */
+@media (min-width: 40rem) {
+  .beat {
+    padding-inline: 2rem;
+  }
 }
 
 @media (min-width: 64rem) {
   .beat {
     transform: translateY(calc(-50% + var(--beat-y)));
+    /* The camera vacates one half of the frame at this breakpoint and the copy
+       takes the other. `lib/scrolly-config.ts` switches its framing on the same
+       64rem, so the two cannot disagree. No scrim here: the copy is over the
+       set, not over the pack. */
+    max-width: min(34rem, max(20rem, 44vw));
     padding: 0;
     background: none;
   }
