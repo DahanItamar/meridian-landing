@@ -1,66 +1,103 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
-import { useFrame } from "@react-three/fiber";
-import { Float, useGLTF } from "@react-three/drei";
+import { useRef } from "react";
+import { useFrame, useThree } from "@react-three/fiber";
+import { Float } from "@react-three/drei";
 import type { Group } from "three";
-import { Box3, Vector3 } from "three";
+import { BagMesh } from "./BagMesh";
 import { damp, scrollState, track } from "@/lib/scroll-store";
 
-const MODEL = "/models/coffee-bag.glb";
-
 /**
- * Scroll keyframes, as [progress, value] pairs across the scrollytelling
- * section. Kept as data rather than a chain of conditionals so the sequence can
- * be read and retimed in one place.
+ * The sequence, as [scrollProgress, value] pairs.
+ *
+ * Five beats. Each holds its pose for a stretch so the eye can rest on it, then
+ * moves — a pack that drifts continuously reads as decoration, whereas one that
+ * arrives, settles, and is inspected reads as a product.
+ *
+ *   0.00 – 0.14  intro      pack to the inline start, steeply tilted
+ *   0.16 – 0.34  survey     centres, completes one full turn
+ *   0.36 – 0.54  inspect    pushes toward camera, label filling the frame
+ *   0.56 – 0.76  reverse    crosses to the inline end, half turn to the back
+ *   0.78 – 1.00  settle     drops back and small, alongside the specs
  */
 const KEYS = {
-  /**
-   * Beat 1 sits three-quarters on. Beat 2 completes a full turn back to the same
-   * face. Beat 3 adds a half turn so the reverse of the pack faces the viewer —
-   * that is the "reveal", and it is why the value is an odd multiple of PI.
-   */
   rotationY: [
-    [0.0, -0.45],
-    [0.28, -0.45],
-    [0.5, Math.PI * 2 - 0.45],
-    [0.62, Math.PI * 2 - 0.45],
-    [0.8, Math.PI * 3 - 0.45],
-    [1.0, Math.PI * 3 - 0.1],
+    [0.0, -0.5],
+    [0.14, -0.5],
+    [0.34, Math.PI * 2 - 0.5],
+    [0.36, Math.PI * 2 - 0.5],
+    // Squares up to the camera so the label is read flat, not at an angle.
+    [0.46, Math.PI * 2],
+    [0.56, Math.PI * 2],
+    [0.76, Math.PI * 3],
+    [1.0, Math.PI * 3 + 0.4],
   ],
   positionX: [
-    [0.0, -1.55],
-    [0.28, -1.55],
-    [0.46, 0],
-    [0.62, 0],
-    [0.8, 1.95],
-    [1.0, 1.8],
+    [0.0, -1.62],
+    [0.14, -1.62],
+    [0.3, 0],
+    [0.46, 0.12],
+    [0.56, 0],
+    [0.76, 1.9],
+    [0.88, 1.9],
+    [1.0, 1.5],
   ],
   positionY: [
-    [0.0, 0.05],
-    [0.8, 0],
-    [1.0, -0.55],
+    [0.0, 0.06],
+    [0.36, 0],
+    [0.46, -0.18],
+    [0.56, 0],
+    [0.86, 0],
+    [1.0, -0.7],
   ],
   positionZ: [
     [0.0, 0],
-    [0.46, 0.5],
-    [0.8, 0],
-    [1.0, -0.5],
+    [0.3, 0.4],
+    [0.56, 0],
+    [0.76, 0],
+    [1.0, -0.8],
   ],
   tiltX: [
-    [0.0, 0.3],
-    [0.46, 0.08],
-    [1.0, 0.14],
+    [0.0, 0.32],
+    [0.3, 0.09],
+    [0.46, 0.02],
+    [0.76, 0.1],
+    [1.0, 0.16],
   ],
   tiltZ: [
-    [0.0, -0.2],
-    [0.46, -0.04],
-    [1.0, -0.1],
+    [0.0, -0.24],
+    [0.3, -0.05],
+    [0.46, 0],
+    [1.0, -0.12],
   ],
   scale: [
     [0.0, 1],
-    [0.8, 0.92],
-    [1.0, 0.78],
+    [0.3, 1.02],
+    [0.46, 1.42],
+    [0.56, 1.02],
+    [0.86, 0.94],
+    [1.0, 0.7],
+  ],
+} satisfies Record<string, [number, number][]>;
+
+/**
+ * Dollying the camera rather than only scaling the pack: pushing in shortens the
+ * apparent depth of the gusset the way a real lens does, which is what makes the
+ * inspect beat feel like moving closer instead of like a zoom.
+ */
+const CAMERA = {
+  z: [
+    [0.0, 6.5],
+    [0.3, 6.0],
+    [0.46, 4.5],
+    [0.56, 6.0],
+    [0.86, 6.4],
+    [1.0, 7.1],
+  ],
+  y: [
+    [0.0, 0.15],
+    [0.46, 0.05],
+    [1.0, 0.3],
   ],
 } satisfies Record<string, [number, number][]>;
 
@@ -68,31 +105,7 @@ export function BagModel({ reducedMotion }: { reducedMotion: boolean }) {
   const outer = useRef<Group>(null);
   const inner = useRef<Group>(null);
   const settled = useRef(false);
-  const { scene } = useGLTF(MODEL);
-
-  /**
-   * Meshy returns the bag at an arbitrary scale, sitting wherever its origin
-   * happened to land. Normalising once here means the keyframes above are in
-   * scene units and stay meaningful if the model is ever re-generated.
-   */
-  const model = useMemo(() => {
-    const clone = scene.clone(true);
-    const box = new Box3().setFromObject(clone);
-    const size = box.getSize(new Vector3());
-    const centre = box.getCenter(new Vector3());
-    const normalise = 2.6 / Math.max(size.x, size.y, size.z);
-    clone.position.set(-centre.x, -centre.y, -centre.z);
-    clone.scale.setScalar(normalise);
-    clone.traverse((child) => {
-      child.castShadow = true;
-      child.receiveShadow = true;
-    });
-    return clone;
-  }, [scene]);
-
-  useEffect(() => {
-    model.scale.setScalar(model.scale.x);
-  }, [model]);
+  const camera = useThree((s) => s.camera);
 
   useFrame((_, delta) => {
     if (!outer.current || !inner.current) return;
@@ -114,24 +127,35 @@ export function BagModel({ reducedMotion }: { reducedMotion: boolean }) {
       o.position.set(track(p, KEYS.positionX), track(p, KEYS.positionY), track(p, KEYS.positionZ));
       o.scale.setScalar(track(p, KEYS.scale));
       i.rotation.set(track(p, KEYS.tiltX), track(p, KEYS.rotationY), track(p, KEYS.tiltZ));
+      camera.position.set(0, track(p, CAMERA.y), track(p, CAMERA.z));
       return;
     }
 
-    const lambda = reducedMotion ? 24 : 6;
+    const lambda = reducedMotion ? 24 : 7;
+
     o.position.x = damp(o.position.x, track(p, KEYS.positionX), lambda, dt);
     o.position.y = damp(o.position.y, track(p, KEYS.positionY), lambda, dt);
     o.position.z = damp(o.position.z, track(p, KEYS.positionZ), lambda, dt);
-
     o.scale.setScalar(damp(o.scale.x, track(p, KEYS.scale), lambda, dt));
 
     i.rotation.y = damp(i.rotation.y, track(p, KEYS.rotationY), lambda, dt);
     i.rotation.x = damp(i.rotation.x, track(p, KEYS.tiltX), lambda, dt);
     i.rotation.z = damp(i.rotation.z, track(p, KEYS.tiltZ), lambda, dt);
+
+    /**
+     * The dolly lives in this loop rather than a sibling component. A second
+     * useFrame driving the camera stopped the pack rendering altogether while
+     * every other object kept drawing — and position only, never lookAt: a
+     * camera on the +Z axis already faces the origin, and calling lookAt each
+     * frame fights whatever r3f does to the camera matrix.
+     */
+    camera.position.z = damp(camera.position.z, track(p, CAMERA.z), 5, dt);
+    camera.position.y = damp(camera.position.y, track(p, CAMERA.y), 5, dt);
   });
 
   const body = (
     <group ref={inner}>
-      <primitive object={model} />
+      <BagMesh />
     </group>
   );
 
@@ -143,12 +167,15 @@ export function BagModel({ reducedMotion }: { reducedMotion: boolean }) {
       {reducedMotion ? (
         body
       ) : (
-        <Float speed={1.1} rotationIntensity={0.16} floatIntensity={0.55} floatingRange={[-0.07, 0.07]}>
+        <Float
+          speed={1.05}
+          rotationIntensity={0.14}
+          floatIntensity={0.5}
+          floatingRange={[-0.06, 0.06]}
+        >
           {body}
         </Float>
       )}
     </group>
   );
 }
-
-useGLTF.preload(MODEL);

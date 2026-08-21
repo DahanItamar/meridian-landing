@@ -9,28 +9,30 @@
  * missing (constitution, Naming).
  *
  * Every pair below was measured against its own background, not eyeballed:
- *   ink    on surface  17.99:1
- *   muted  on surface   7.26:1
- *   brand  on surface   5.38:1
- *   ink    on brand     5.15:1   (button label)
- *   edge   on surface    3.10:1  (form borders, focus rings — WCAG 1.4.11 wants 3:1)
- *   line   on surface    1.19:1  (decorative hairlines only, deliberately below 3:1)
+ *   ink    on surface  18.88:1
+ *   muted  on surface   9.48:1   (was 7.26 — the page read muddy, this is why)
+ *   brand  on surface   7.90:1   (was 5.38)
+ *   gold   on surface  10.78:1
+ *   ink    on brand     7.52:1   (button label)
+ *   edge   on surface   3.81:1   (form borders, focus rings — WCAG 1.4.11 wants 3:1)
+ *   line   on surface   1.22:1   (decorative hairlines only, deliberately below 3:1)
  */
 @theme {
-  --color-surface: #0b0908;
-  --color-surface-raised: #161110;
-  --color-surface-deep: #060505;
+  --color-surface: #0a0807;
+  --color-surface-raised: #17120f;
+  --color-surface-deep: #050403;
 
-  --color-ink: #f7f3ee;
+  --color-ink: #fbf8f4;
   --color-ink-inverse: #140f0c;
-  --color-muted: #a89a8d;
-  --color-muted-inverse: #5f554e;
+  --color-muted: #c0b0a0;
+  --color-muted-inverse: #6b6058;
 
-  --color-brand: #c2703f;
-  --color-brand-hover: #d4834f;
+  --color-brand: #d9944e;
+  --color-brand-hover: #e8a863;
+  --color-gold: #e3b77c;
 
-  --color-line: #241c19;
-  --color-edge: #6b5c51;
+  --color-line: #2a211c;
+  --color-edge: #7a695c;
 
   --font-display: var(--font-display), ui-sans-serif, system-ui, sans-serif;
   --font-body: var(--font-body), ui-sans-serif, system-ui, sans-serif;

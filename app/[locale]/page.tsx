@@ -1,5 +1,4 @@
 import { notFound } from "next/navigation";
-import { FeatureBento } from "@/components/FeatureBento";
 import { HeroScrolly } from "@/components/HeroScrolly";
 import { SpecBento } from "@/components/SpecBento";
 import { Testimonials } from "@/components/Testimonials";
@@ -18,7 +17,6 @@ export default async function LandingPage({
   return (
     <main>
       <HeroScrolly content={content} />
-      <FeatureBento content={content} />
       <SpecBento content={content} />
       <Testimonials content={content} />
     </main>

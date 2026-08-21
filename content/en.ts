@@ -37,28 +37,19 @@ export const en = {
 
   features: [
     {
+      kicker: "Traceable to the estate",
       title: "One farm, named on the bag",
       body: "Most specialty coffee tells you the country and stops there, because the supply chain genuinely does not know the rest. Ours names the estate, the washing station, the altitude band and the harvest window — printed on the bag, not buried on a website. If a lot cannot be traced that far, we do not buy it.",
-      image: "/images/origin-cherries.jpg",
-      imageAlt: "Ripe red coffee cherries on the branch, ready for selective picking",
-      width: 1024,
-      height: 683,
     },
     {
+      kicker: "Developed for both",
       title: "Roasted light enough to taste the fruit, dark enough to pull",
       body: "A single origin this delicate is usually roasted for filter and falls apart under nine bars. We develop it slightly further — enough body to hold an espresso together without flattening the jasmine. One roast, both brew methods, and no compromise you can taste in the cup.",
-      image: "/images/origin-roast.jpg",
-      imageAlt: "A drum roaster mid-batch, beans visible through the sight glass",
-      width: 768,
-      height: 1024,
     },
     {
+      kicker: "Freshness, stated",
       title: "A roast date, not a best-before",
       body: "Coffee does not expire; it fades. It is at its best somewhere between seven and twenty-one days off the roast, and a best-before eighteen months out tells you nothing about that. We print the day it was roasted and let you do the arithmetic, which is the only honest way to sell a bag of coffee.",
-      image: "/images/origin-beans.jpg",
-      imageAlt: "Whole roasted coffee beans in close detail, showing an even medium-light colour",
-      width: 1024,
-      height: 768,
     },
   ],
 

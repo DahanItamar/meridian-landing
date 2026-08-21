@@ -10,16 +10,16 @@ export const LOCALES: readonly Locale[] = ["en", "he"] as const;
 
 export const DEFAULT_LOCALE: Locale = "en";
 
+/**
+ * Text only. The feature sections carry no photography: stock imagery of other
+ * people's coffee undercut the product it was meant to support, and the 3D pack
+ * is the only product shot this page needs.
+ */
 export interface Feature {
   title: string;
   body: string;
-  /** Path under /public. The same asset serves both locales. */
-  image: string;
-  imageAlt: string;
-  /** Intrinsic pixel size of the file. Must match it — AC-028 exists to reserve
-   *  correct layout space, and a wrong number reserves the wrong space. */
-  width: number;
-  height: number;
+  /** One line, used as the eyebrow above the title in the scroll sequence. */
+  kicker: string;
 }
 
 export interface Testimonial {

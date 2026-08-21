@@ -18,34 +18,37 @@ const HeroScene = dynamic(() => import("./three/HeroScene").then((m) => m.HeroSc
 });
 
 /**
- * Fades a block in over its own slice of the scroll, and back out after it.
+ * One beat of copy, tied to the same scroll slice as the pose it belongs to.
  *
- * `startVisible` exists because the first panel is already on screen when the
- * page loads: fading it in from zero would leave the headline invisible until
- * the visitor scrolls, which is the opposite of what a hero is for.
+ * The fades overlap the model's holds rather than its moves: text arriving while
+ * the pack is still travelling is what made the earlier version read as a page
+ * with a bag drifting past it. Copy now lands after the pack has settled and
+ * leaves before it departs.
  */
-function Panel({
+function Beat({
   progress,
-  range,
-  children,
+  at,
   align,
+  children,
   startVisible = false,
 }: {
   progress: ReturnType<typeof useScroll>["scrollYProgress"];
-  range: [number, number, number, number];
-  children: React.ReactNode;
+  /** [fadeInStart, fullyIn, startFadeOut, fullyOut] */
+  at: [number, number, number, number];
   align: "start" | "end";
+  children: React.ReactNode;
   startVisible?: boolean;
 }) {
-  const opacity = useTransform(progress, range, startVisible ? [1, 1, 1, 0] : [0, 1, 1, 0]);
-  const y = useTransform(progress, range, startVisible ? [0, 0, 0, -28] : [28, 0, 0, -28]);
+  const opacity = useTransform(progress, at, startVisible ? [1, 1, 1, 0] : [0, 1, 1, 0]);
+  const y = useTransform(progress, at, startVisible ? [0, 0, 0, -34] : [34, 0, 0, -34]);
+  const blur = useTransform(progress, at, startVisible ? [0, 0, 0, 6] : [6, 0, 0, 6]);
+  const filter = useTransform(blur, (v) => `blur(${v}px)`);
 
   return (
     <motion.div
-      style={{ opacity, y }}
-      aria-hidden={undefined}
+      style={{ opacity, y, filter }}
       className={`pointer-events-none absolute inset-x-6 top-1/2 -translate-y-1/2 lg:inset-x-14 ${
-        align === "start" ? "lg:me-auto lg:max-w-lg" : "lg:ms-auto lg:max-w-lg"
+        align === "start" ? "lg:me-auto lg:max-w-xl" : "lg:ms-auto lg:max-w-xl"
       }`}
     >
       <div className="pointer-events-auto">{children}</div>
@@ -53,30 +56,19 @@ function Panel({
   );
 }
 
-/** Small pill used for the origin metadata block. */
-function Meta({ rows }: { rows: { label: string; value: string }[] }) {
-  return (
-    <dl className="mt-7 space-y-2 border-s-2 border-brand/50 ps-5">
-      {rows.map((row) => (
-        <div key={row.label} className="flex flex-wrap gap-x-3 text-sm">
-          <dt className="tracking-[0.14em] text-muted uppercase">{row.label}</dt>
-          <dd className="text-ink">{row.value}</dd>
-        </div>
-      ))}
-    </dl>
-  );
+function Kicker({ children }: { children: React.ReactNode }) {
+  return <p className="text-xs tracking-[0.34em] text-brand uppercase">{children}</p>;
 }
 
 export function HeroScrolly({ content }: { content: Content }) {
   const container = useRef<HTMLDivElement>(null);
-  const { brand, hero, specs, features } = content;
+  const { brand, hero, specs, features, proof } = content;
 
   const originRows = specs.rows.filter((r) =>
-    ["Origin", "Altitude", "Process", "Tasting notes"].includes(r.label),
+    ["Origin", "Producer", "Altitude", "Process"].includes(r.label),
   );
+  const notes = specs.rows.find((r) => r.label === "Tasting notes");
 
-  // Progress across the whole scrollytelling container: 0 when its top meets
-  // the viewport top, 1 when its bottom does.
   const { scrollYProgress } = useScroll({
     target: container,
     offset: ["start start", "end end"],
@@ -87,30 +79,30 @@ export function HeroScrolly({ content }: { content: Content }) {
     scrollState.progress = v;
   });
 
+  // The warm wash tracks the pack across the viewport rather than sitting in one
+  // place, so the light appears to belong to the object rather than the page.
+  const glowX = useTransform(scrollYProgress, [0, 0.3, 0.56, 0.76, 1], ["30%", "50%", "50%", "68%", "62%"]);
+  const glowOpacity = useTransform(scrollYProgress, [0, 0.4, 0.5, 1], [0.85, 1, 1, 0.6]);
+
   return (
-    <section ref={container} className="relative h-[360vh] bg-surface">
+    <section ref={container} className="relative h-[520vh] bg-surface">
       <div className="sticky top-0 h-screen overflow-hidden">
-        {/*
-          Warm key light behind the pack. This is a radial wash on the page
-          rather than a filter on the canvas: bloom on a WebGL layer costs a
-          post-processing pass every frame, and at this size the two are
-          indistinguishable.
-        */}
-        <div
+        <motion.div
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 z-0"
           style={{
-            background:
-              "radial-gradient(58% 52% at 34% 46%, rgba(194,112,63,0.30) 0%, rgba(194,112,63,0.10) 38%, rgba(11,9,8,0) 72%)",
+            opacity: glowOpacity,
+            background: useTransform(
+              glowX,
+              (x) =>
+                `radial-gradient(62% 56% at ${x} 48%, rgba(240,164,92,0.26) 0%, rgba(217,148,78,0.10) 40%, rgba(10,8,7,0) 74%)`,
+            ),
           }}
         />
 
         <div className="absolute inset-0 z-10">
           <HeroScene />
 
-          {/* Seen by anyone whose browser or settings block scripts entirely. It
-              is the same product at a similar size, so nothing jumps when the
-              canvas takes over. */}
           <noscript>
             <div className="grid h-full place-items-center">
               <Image
@@ -126,14 +118,9 @@ export function HeroScrolly({ content }: { content: Content }) {
         </div>
 
         <div className="relative z-20 mx-auto h-full max-w-6xl">
-          {/* Beat 1 — the pitch. Pack sits to the inline start, copy opposite. */}
-          <Panel
-            progress={scrollYProgress}
-            range={[0, 0.05, 0.2, 0.29]}
-            align="end"
-            startVisible
-          >
-            <p className="text-xs tracking-[0.34em] text-brand uppercase">{brand.name}</p>
+          {/* 1 — the claim. Pack to the inline start, copy opposite. */}
+          <Beat progress={scrollYProgress} at={[0, 0.02, 0.1, 0.15]} align="end" startVisible>
+            <Kicker>{brand.name}</Kicker>
             <h1 className="display mt-5 text-5xl text-ink sm:text-6xl lg:text-7xl">
               {hero.headline}
             </h1>
@@ -147,37 +134,68 @@ export function HeroScrolly({ content }: { content: Content }) {
               </a>
               <span className="text-sm text-muted">{brand.product}</span>
             </div>
-          </Panel>
+          </Beat>
 
-          {/* Beat 2 — origin. Pack centred and turning, copy opposite. */}
-          <Panel progress={scrollYProgress} range={[0.31, 0.4, 0.54, 0.62]} align="end">
-            <p className="text-xs tracking-[0.34em] text-brand uppercase">{hero.eyebrow}</p>
+          {/* 2 — the farm. Pack centres and turns. */}
+          <Beat progress={scrollYProgress} at={[0.17, 0.23, 0.3, 0.35]} align="end">
+            <Kicker>{features[0].kicker}</Kicker>
             <h2 className="display mt-5 text-4xl text-ink sm:text-5xl lg:text-6xl">
               {features[0].title}
             </h2>
-            <Meta rows={originRows} />
-          </Panel>
+            <dl className="mt-8 space-y-3 border-s-2 border-brand/60 ps-6">
+              {originRows.map((row) => (
+                <div key={row.label} className="flex flex-wrap gap-x-3">
+                  <dt className="text-sm tracking-[0.14em] text-muted uppercase">{row.label}</dt>
+                  <dd className="text-ink">{row.value}</dd>
+                </div>
+              ))}
+            </dl>
+          </Beat>
 
-          {/* Beat 3 — the reverse of the pack. Pack moves to the inline end, so
-              the copy crosses to the inline start. */}
-          <Panel progress={scrollYProgress} range={[0.64, 0.73, 0.88, 0.97]} align="start">
-            <p className="text-xs tracking-[0.34em] text-brand uppercase">{features[2].title}</p>
+          {/* 3 — the inspect beat. Pack fills the frame, so the copy stays short
+              and gets out of its way. */}
+          <Beat progress={scrollYProgress} at={[0.38, 0.43, 0.5, 0.55]} align="start">
+            <Kicker>{notes?.label}</Kicker>
+            <p className="display mt-5 text-4xl text-gold sm:text-5xl">{notes?.value}</p>
+            <p className="mt-6 max-w-sm leading-relaxed text-muted">{proof[0].statLabel}</p>
+            <p className="display mt-1 text-6xl text-ink">{proof[0].statValue}</p>
+          </Beat>
+
+          {/* 4 — the reverse. Pack crosses to the inline end, copy follows to
+              the start. */}
+          <Beat progress={scrollYProgress} at={[0.58, 0.64, 0.71, 0.76]} align="start">
+            <Kicker>{features[1].kicker}</Kicker>
             <h2 className="display mt-5 text-4xl text-ink sm:text-5xl lg:text-6xl">
               {features[1].title}
             </h2>
+            <p className="mt-6 max-w-prose leading-relaxed text-muted">{features[1].body}</p>
+          </Beat>
+
+          {/* 5 — the close. Pack settles small, copy takes the frame. */}
+          <Beat progress={scrollYProgress} at={[0.79, 0.85, 0.97, 1]} align="start">
+            <Kicker>{features[2].kicker}</Kicker>
+            <h2 className="display mt-5 text-4xl text-ink sm:text-5xl lg:text-6xl">
+              {features[2].title}
+            </h2>
             <p className="mt-6 max-w-prose leading-relaxed text-muted">{features[2].body}</p>
-          </Panel>
+            <a
+              href="#launch-list"
+              className="mt-8 inline-flex min-h-11 items-center rounded-card border border-edge px-6 py-3 font-medium text-ink transition-colors duration-150 hover:border-brand hover:text-brand"
+            >
+              {content.capture.submit}
+            </a>
+          </Beat>
         </div>
 
         {/* Scroll affordance — the sequence is invisible until someone scrolls,
             so it needs to be obvious that scrolling is the interaction. */}
         <motion.div
           aria-hidden="true"
-          style={{ opacity: useTransform(scrollYProgress, [0, 0.06], [1, 0]) }}
+          style={{ opacity: useTransform(scrollYProgress, [0, 0.04], [1, 0]) }}
           className="absolute inset-x-0 bottom-8 z-20 flex justify-center"
         >
-          <span className="h-10 w-6 rounded-full border border-edge">
-            <span className="mx-auto mt-2 block h-2 w-1 rounded-full bg-brand" />
+          <span className="flex h-10 w-6 justify-center rounded-full border border-edge pt-2">
+            <span className="h-2 w-1 rounded-full bg-brand" />
           </span>
         </motion.div>
       </div>
